@@ -1,5 +1,5 @@
 import { eventBus } from '../core/eventBus.js';
-import { EVENTS, DISCOVERY_MODES } from '../core/constants.js';
+import { EVENTS } from '../core/constants.js';
 import { stateManager } from '../core/stateManager.js';
 import { createRepositoryCard } from './repositoryCard.js';
 import { createCollectionsView } from './collectionsView.js';
@@ -31,23 +31,27 @@ let collectionsFeature, filtersFeature, searchFeature, profileFeature, statistic
 
 export function initializeAppController() {
   const mainContent = document.getElementById('main-content');
+  
+  // Header buttons
   const collectionsBtn = document.getElementById('collections-btn');
+  const dashboardBtn = document.getElementById('dashboard-btn');
+  const profileBtn = document.getElementById('profile-btn');
+  const settingsBtn = document.getElementById('settings-btn');
+  
+  // Footer buttons
   const filterToggleBtn = document.getElementById('filter-toggle-btn');
   const historyToggleBtn = document.getElementById('history-toggle-btn');
-  const dashboardBtn = document.getElementById('dashboard-btn');
+  const homeBtn = document.getElementById('home-btn');
   
-  // Profil DOM Elementleri
-  const profileBtn = document.getElementById('profile-btn');
+  // Modal elements
   const profileModal = document.getElementById('profile-modal');
   const profileContent = document.getElementById('profile-content');
   const closeModal = document.getElementById('close-profile-modal');
-
-  const settingsBtn = document.getElementById('settings-btn');
   const settingsModal = document.getElementById('settings-modal');
   const settingsContent = document.getElementById('settings-content');
   const closeSettingsBtn = document.getElementById('close-settings-modal');
 
-  // Özellikleri Başlat
+  // Initialize features
   collectionsFeature = initializeCollectionsFeature();
   filtersFeature = initializeFiltersFeature(() => {});
   searchFeature = initializeSearchFeature();
@@ -55,11 +59,8 @@ export function initializeAppController() {
   statisticsFeature = initializeStatisticsFeature();
   settingsFeature = initializeSettingsFeature();
 
-  // --- Profil Modal Mantığı ---
-  profileBtn?.addEventListener('click', () => {
-    openProfileModal();
-  });
-
+  // --- Profile Modal ---
+  profileBtn?.addEventListener('click', () => openProfileModal());
   closeModal?.addEventListener('click', () => {
     if (profileModal) profileModal.style.display = 'none';
     eventBus.emit(EVENTS.PROFILE_CLOSED);
@@ -75,20 +76,18 @@ export function initializeAppController() {
     }
   });
 
+  // --- Settings ---
   settingsBtn?.addEventListener('click', () => {
     renderSettingsPanel();
     if (settingsModal) settingsModal.style.display = 'block';
   });
-
   closeSettingsBtn?.addEventListener('click', () => {
     if (settingsModal) settingsModal.style.display = 'none';
   });
 
   function openProfileModal(editing = false) {
     if (!profileModal) return;
-
     if (!profileService.isProfileComplete()) {
-      // İlk kullanım: Düzenleyiciyi göster
       renderProfileEditor();
     } else if (editing) {
       renderProfileEditor();
@@ -105,12 +104,9 @@ export function initializeAppController() {
     const profile = profileService.getProfile();
     const summary = profileService.getProfileSummary();
     const activity = profileService.getActivity();
-    
     const view = createProfileView(
-      profile, 
-      summary, 
-      activity,
-      () => openProfileModal(true), // Düzenleme modunu aç (onEdit)
+      profile, summary, activity,
+      () => openProfileModal(true),
       profileFeature.onExport,
       profileFeature.onImport,
       profileFeature.onReset
@@ -122,12 +118,10 @@ export function initializeAppController() {
     if (!profileContent) return;
     profileContent.innerHTML = '';
     const profile = profileService.getProfile() || { username: '', avatar: 'default' };
-    
     const editor = createProfileEditor(
       profile,
       (updates) => {
         if (!profileService.isProfileComplete()) {
-          // Yeni profil oluşturuluyor
           profileService.createProfile(updates.username);
           eventBus.emit(EVENTS.PROFILE_CREATED);
         } else {
@@ -139,7 +133,7 @@ export function initializeAppController() {
         if (!profileService.isProfileComplete()) {
           if (profileModal) profileModal.style.display = 'none';
         } else {
-          renderProfileView(); // İptal edildiğinde görünüme geri dön
+          renderProfileView();
         }
       }
     );
@@ -161,7 +155,12 @@ export function initializeAppController() {
     settingsContent.appendChild(panel);
   }
 
-  // --- Görünüm Değiştirme (View Switching) ---
+  // --- Navigation ---
+  homeBtn?.addEventListener('click', () => {
+    stateManager.setState('currentView', 'home');
+    eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'home' });
+  });
+
   collectionsBtn?.addEventListener('click', () => {
     const cv = stateManager.getState().currentView;
     const nextView = cv === 'collections' ? 'discovery' : 'collections';
@@ -174,7 +173,6 @@ export function initializeAppController() {
     eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'dashboard' });
   });
 
-  // --- Filtre Sayfası Aç/Kapa ---
   filterToggleBtn?.addEventListener('click', () => {
     const cv = stateManager.getState().currentView;
     const nextView = cv === 'filters' ? 'discovery' : 'filters';
@@ -188,7 +186,6 @@ export function initializeAppController() {
     }
   });
 
-  // --- Geçmiş Sayfası Aç/Kapa ---
   historyToggleBtn?.addEventListener('click', () => {
     const cv = stateManager.getState().currentView;
     const nextView = cv === 'history' ? 'discovery' : 'history';
@@ -200,16 +197,14 @@ export function initializeAppController() {
     }
   });
 
-  renderDiscoveryModeBar();
-
-  // --- Arama Çubuğu ---
+  // --- Search Bar ---
   const searchContainer = document.getElementById('search-container');
   if (searchContainer) {
     const searchBar = createSearchBar(searchFeature.onSearch);
     searchContainer.appendChild(searchBar);
   }
 
-  // --- Event Dinleyicileri (Event Listeners) ---
+  // --- Event Listeners ---
   eventBus.on(EVENTS.DISCOVERY_LOADING, () => {
     if (stateManager.getState().currentView === 'discovery') showLoading(mainContent);
   });
@@ -224,32 +219,26 @@ export function initializeAppController() {
   });
 
   eventBus.on(EVENTS.VIEW_CHANGED, ({ view }) => {
+    // Reset active states
+    filterToggleBtn?.classList.remove('active');
+    historyToggleBtn?.classList.remove('active');
+    homeBtn?.classList.remove('active');
+
     if (view === 'home') {
       renderHomeView(mainContent);
-      historyToggleBtn?.classList.remove('active');
-      filterToggleBtn?.classList.remove('active');
-      if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.collections');
+      homeBtn?.classList.add('active');
     } else if (view === 'collections') {
       renderCollectionsView(mainContent);
-      if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.discovery');
-      historyToggleBtn?.classList.remove('active');
-      filterToggleBtn?.classList.remove('active');
     } else if (view === 'dashboard') {
       renderDashboard(mainContent);
-      if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.collections');
-      historyToggleBtn?.classList.remove('active');
-      filterToggleBtn?.classList.remove('active');
     } else if (view === 'filters') {
       renderFilterPage(mainContent);
-      historyToggleBtn?.classList.remove('active');
+      filterToggleBtn?.classList.add('active');
     } else if (view === 'history') {
       renderHistoryPage(mainContent);
-      filterToggleBtn?.classList.remove('active');
+      historyToggleBtn?.classList.add('active');
     } else {
-      // discovery view
-      if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.collections');
-      historyToggleBtn?.classList.remove('active');
-      filterToggleBtn?.classList.remove('active');
+      // discovery
       eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
     }
   });
@@ -261,16 +250,13 @@ export function initializeAppController() {
     });
   });
 
-  eventBus.on(EVENTS.FILTER_APPLIED, () => { updateActiveFilterBadge(); });
-  eventBus.on(EVENTS.FILTER_RESET, () => { updateActiveFilterBadge(); });
-  eventBus.on(EVENTS.HISTORY_CLEARED, () => { 
-    if (stateManager.getState().currentView === 'history') renderHistoryPage(mainContent); 
-  });
-  eventBus.on(EVENTS.SEARCH_CLEARED, () => { 
-    if (stateManager.getState().currentView === 'discovery') eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY); 
+  eventBus.on(EVENTS.FILTER_APPLIED, () => updateActiveFilterBadge());
+  eventBus.on(EVENTS.FILTER_RESET, () => updateActiveFilterBadge());
+
+  eventBus.on(EVENTS.HISTORY_CLEARED, () => {
+    if (stateManager.getState().currentView === 'history') renderHistoryPage(mainContent);
   });
 
-  // Profil Olayları
   eventBus.on(EVENTS.PROFILE_UPDATED, () => {
     if (profileModal && profileModal.style.display === 'block') renderProfileView();
   });
@@ -279,48 +265,48 @@ export function initializeAppController() {
     if (profileModal) profileModal.style.display = 'none';
   });
 
-  // --- Klavye Kısayolları ---
+  // --- Keyboard Shortcuts ---
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
-    if (profileModal && profileModal.style.display === 'block') return; // Modal açıkken kısayolları devre dışı bırak
+    if (profileModal && profileModal.style.display === 'block') return;
 
     let s = null, a = null;
     switch (e.code) {
-      case 'Space': 
-        e.preventDefault(); 
-        s = 'Space'; 
-        const currentView = stateManager.getState().currentView;
-        if (currentView === 'home') {
+      case 'Space':
+        e.preventDefault();
+        s = 'Space';
+        const cv = stateManager.getState().currentView;
+        if (cv === 'home') {
           stateManager.setState('currentView', 'discovery');
           eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
         }
-        eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY); 
+        eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
         break;
-      case 'Enter': 
-        s = 'Enter'; 
-        triggerActionButton('open-github'); 
-        break;
-      case 'Escape': 
-        s = 'ESC'; 
-        if (stateManager.getState().currentView === 'filters' || stateManager.getState().currentView === 'history') {
+      case 'Escape':
+        s = 'ESC';
+        const cv2 = stateManager.getState().currentView;
+        if (cv2 === 'filters' || cv2 === 'history') {
           stateManager.setState('currentView', 'discovery');
           eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
         }
         break;
-      case 'KeyS': 
-        if (!e.ctrlKey && !e.metaKey) { s = 'S'; a = 'save-repository'; } 
+      case 'KeyS':
+        if (!e.ctrlKey && !e.metaKey) { s = 'S'; a = 'save-repository'; }
         break;
-      case 'KeyL': 
-        if (!e.ctrlKey && !e.metaKey) { s = 'L'; a = 'like-repository'; } 
+      case 'KeyL':
+        if (!e.ctrlKey && !e.metaKey) { s = 'L'; a = 'like-repository'; }
         break;
-      case 'KeyD': 
-        if (!e.ctrlKey && !e.metaKey) { s = 'D'; a = 'dislike-repository'; } 
+      case 'KeyD':
+        if (!e.ctrlKey && !e.metaKey) { s = 'D'; a = 'dislike-repository'; }
         break;
-      case 'KeyF': 
-        if (!e.ctrlKey && !e.metaKey) { s = 'F'; filterToggleBtn?.click(); } 
+      case 'KeyF':
+        if (!e.ctrlKey && !e.metaKey) { s = 'F'; filterToggleBtn?.click(); }
         break;
-      case 'KeyH': 
-        if (!e.ctrlKey && !e.metaKey) { s = 'H'; historyToggleBtn?.click(); } 
+      case 'KeyH':
+        if (!e.ctrlKey && !e.metaKey) { s = 'H'; historyToggleBtn?.click(); }
+        break;
+      case 'KeyM':
+        if (!e.ctrlKey && !e.metaKey) { s = 'M'; homeBtn?.click(); }
         break;
     }
     if (s) {
@@ -330,22 +316,21 @@ export function initializeAppController() {
   });
 }
 
-// --- Yardımcı Render Fonksiyonları ---
-
+// --- Helpers ---
 function triggerActionButton(action) {
   const btn = document.querySelector(`.repository-card .btn[data-action="${action}"]`);
-  if (btn) { 
-    btn.click(); 
-    btn.classList.add('keyboard-active'); 
-    setTimeout(() => btn.classList.remove('keyboard-active'), 150); 
-    return true; 
+  if (btn) {
+    btn.click();
+    btn.classList.add('keyboard-active');
+    setTimeout(() => btn.classList.remove('keyboard-active'), 150);
+    return true;
   }
   return false;
 }
 
 function showLoading(container) {
   if (!container) return;
-  container.innerHTML = `<div class="card-skeleton" role="status" aria-label="${localization.t('discovery.loading')}"><div class="skeleton-header"></div><div class="skeleton-description"></div><div class="skeleton-stats"></div><div class="skeleton-actions"></div></div>`;
+  container.innerHTML = `<div class="card-skeleton"><div class="skeleton-header"></div><div class="skeleton-description"></div><div class="skeleton-stats"></div><div class="skeleton-actions"></div></div>`;
 }
 
 function renderRepository(container, repo) {
@@ -355,18 +340,18 @@ function renderRepository(container, repo) {
   eventBus.emit(EVENTS.REPOSITORY_RENDERED, { repository: repo });
 }
 
+function renderHomeView(container) {
+  if (!container) return;
+  container.innerHTML = '';
+  container.appendChild(createHomeView());
+}
+
 function renderCollectionsView(container) {
   if (!container) return;
   container.innerHTML = '';
   const collections = collectionService.getCollections();
   const savedRepos = collectionService.getSavedRepositories();
   container.appendChild(createCollectionsView(collections, savedRepos));
-}
-
-function renderHomeView(container) {
-  if (!container) return;
-  container.innerHTML = '';
-  container.appendChild(createHomeView());
 }
 
 function renderDashboard(container) {
@@ -381,23 +366,19 @@ function renderDashboard(container) {
 function renderFilterPage(container) {
   if (!container) return;
   container.innerHTML = '';
-  
-  // Page wrapper
   const pageDiv = document.createElement('div');
   pageDiv.className = 'panel-page filter-panel-page';
-  
   const filterContent = createFilterPanel(
-    filterService.getFilters(), 
+    filterService.getFilters(),
     (key, val) => {
       filtersFeature.onFilterChange(key, val);
       updateActiveFilterBadge();
-    }, 
+    },
     () => {
       filtersFeature.onReset();
       updateActiveFilterBadge();
     }
   );
-  
   pageDiv.appendChild(filterContent);
   container.appendChild(pageDiv);
 }
@@ -405,19 +386,17 @@ function renderFilterPage(container) {
 function renderHistoryPage(container) {
   if (!container) return;
   container.innerHTML = '';
-  
   const state = stateManager.getState();
   const historyContainer = document.createElement('div');
   historyContainer.className = 'panel-page history-panel-page';
-  
-  // Header with close button
+
   const header = document.createElement('div');
   header.className = 'panel-header';
   const title = document.createElement('h2');
-  title.textContent = localization.t('history.title');
+  title.textContent = localization.t('history.title') || 'History';
   const closeBtn = document.createElement('button');
   closeBtn.className = 'panel-close';
-  closeBtn.textContent = '✕ ' + localization.t('nav.discovery');
+  closeBtn.textContent = '✕ Back';
   closeBtn.addEventListener('click', () => {
     stateManager.setState('currentView', 'discovery');
     eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
@@ -425,8 +404,7 @@ function renderHistoryPage(container) {
   header.appendChild(title);
   header.appendChild(closeBtn);
   historyContainer.appendChild(header);
-  
-  // History content
+
   const historyContent = createHistoryPanel(
     state.discovery?.history || [],
     state.recentlyViewed || [],
@@ -439,7 +417,6 @@ function renderHistoryPage(container) {
     clearHistory
   );
   historyContainer.appendChild(historyContent);
-  
   container.appendChild(historyContainer);
 }
 
@@ -464,7 +441,7 @@ function updateActiveFilterBadge() {
 
 function showError(container, error) {
   if (!container) return;
-  container.innerHTML = `<div class="error-state" role="alert" tabindex="-1"><p>${localization.t('discovery.error')}</p><p class="error-details">${error || localization.t('discovery.error')}</p><button class="btn btn-primary" id="retry-btn">${localization.t('discovery.retry')}</button></div>`;
+  container.innerHTML = `<div class="error-state" role="alert" tabindex="-1"><p>Something went wrong</p><p class="error-details">${error || 'Unknown error'}</p><button class="btn btn-primary" id="retry-btn">Try Again</button></div>`;
   document.getElementById('retry-btn')?.addEventListener('click', () => eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY));
   container.querySelector('.error-state')?.focus();
 }

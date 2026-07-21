@@ -3,74 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reepo - Discover GitHub Repositories</title>
-  <meta name="description" content="Discover open-source GitHub repositories through a randomized, rewarding experience.">
+  <title>Reepo - Random GitHub Repo Discovery</title>
+  <meta name="description" content="Discover random GitHub repositories in a fun, gamified way. Spin, explore, collect.">
   <meta name="theme-color" content="#7c3aed">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/icons/icon.svg">
   <link rel="apple-touch-icon" href="assets/icons/icon.svg">
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Reepo - Discover GitHub Repositories">
-  <meta property="og:description" content="Randomized discovery, collections, badges and more. Explore the unexpected.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://reepo.github.io/">
-  <meta property="og:image" content="https://reepo.github.io/assets/icons/icon.svg">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Reepo - Discover GitHub Repositories">
-  <meta name="twitter:description" content="Randomized discovery of GitHub repos with gamification.">
-  <meta name="twitter:image" content="https://reepo.github.io/assets/icons/icon.svg">
-
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app-container">
-    <header class="app-header" role="banner">
-      <div class="header-content">
-        <h1 class="app-logo" id="app-logo">Reepo</h1>
+    <!-- Top Bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <h1 class="app-logo">Reepo</h1>
+        <span class="header-badge">v2.0</span>
       </div>
-      <div class="header-search" id="search-container">
+      <div class="header-center">
+        <div id="search-container"></div>
       </div>
-      <nav class="app-nav" role="navigation" aria-label="Main navigation">
-        <button class="nav-button" id="filter-toggle-btn" aria-label="Toggle Filters"><span class="nav-icon">🔍</span> Filters <span id="filter-active-count" class="badge"></span></button>
-        <button class="nav-button" id="history-toggle-btn" aria-label="Toggle History"><span class="nav-icon">🕒</span> History</button>
-        <button class="nav-button" id="collections-btn" aria-label="View Collections"><span class="nav-icon">📁</span> Collections</button>
-        <button class="nav-button" id="dashboard-btn" aria-label="Dashboard">
-          <span class="nav-icon">📊</span> Dashboard
-        </button>
-        <button class="nav-button" id="settings-btn" aria-label="Settings">
-          <span class="nav-icon">⚙️</span> Settings
-        </button>
-        <button class="nav-button" id="profile-btn" aria-label="Profile">
-          <span class="nav-icon">👤</span> Profile
-        </button>
+      <nav class="app-nav">
+        <button class="nav-btn" id="collections-btn" title="Collections"><span>📁</span></button>
+        <button class="nav-btn" id="dashboard-btn" title="Stats"><span>📊</span></button>
+        <button class="nav-btn" id="profile-btn" title="Profile"><span>👤</span></button>
+        <button class="nav-btn" id="settings-btn" title="Settings"><span>⚙️</span></button>
       </nav>
     </header>
 
-    <div id="discovery-mode-container" class="discovery-mode-bar"></div>
-
+    <!-- Main Game Area -->
     <div class="app-body">
-      <main id="main-content" class="main-content" role="main">
-        <div class="card-skeleton" role="status"><div class="skeleton-header"></div><div class="skeleton-description"></div><div class="skeleton-stats"></div><div class="skeleton-actions"></div></div>
-      </main>
+      <main id="main-content" class="main-content"></main>
     </div>
 
+    <!-- Bottom Notification Area -->
     <div id="notification-container" class="notification-container"></div>
     
-    <footer class="app-footer" role="contentinfo"><p class="footer-text" id="footer-text"></p></footer>
+    <!-- Bottom Footer Bar -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <button class="footer-btn" id="filter-toggle-btn" title="Filters">🔍 <span id="filter-active-count" class="badge"></span></button>
+        <button class="footer-btn" id="history-toggle-btn" title="History">🕒</button>
+        <button class="footer-btn" id="home-btn" title="Home">🏠</button>
+      </div>
+      <div class="footer-center">
+        <div id="discovery-mode-container" class="discovery-mode-bar"></div>
+      </div>
+      <div class="footer-right">
+        <p class="footer-text" id="footer-text"></p>
+      </div>
+    </footer>
   </div>
 
-  <!-- Profile Modal -->
-  <div id="profile-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="profile-title" style="display:none;">
+  <!-- Modals -->
+  <div id="profile-modal" class="modal" style="display:none;">
     <div class="modal-content">
       <span class="close-modal" id="close-profile-modal">&times;</span>
       <div id="profile-content"></div>
     </div>
   </div>
-
-  <div id="settings-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" style="display:none;">
+  <div id="settings-modal" class="modal" style="display:none;">
     <div class="modal-content settings-modal-content">
       <span class="close-modal" id="close-settings-modal">&times;</span>
       <div id="settings-content"></div>
@@ -79,8 +70,8 @@
 
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        registrations.forEach((registration) => registration.unregister());
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(r => r.unregister());
       }).catch(() => {});
     }
   </script>

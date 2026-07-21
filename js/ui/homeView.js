@@ -9,183 +9,176 @@ export function createHomeView() {
   const view = document.createElement('div');
   view.className = 'home-view';
 
-  // Hero Section
-  const hero = document.createElement('div');
-  hero.className = 'home-hero';
+  // === Game Title ===
+  const gameHeader = document.createElement('div');
+  gameHeader.className = 'home-game-header';
+  const title = document.createElement('h1');
+  title.className = 'home-game-title';
+  title.textContent = 'Reepo';
+  const subtitle = document.createElement('p');
+  subtitle.className = 'home-game-subtitle';
+  subtitle.textContent = 'Random GitHub Repo Discovery';
+  gameHeader.appendChild(title);
+  gameHeader.appendChild(subtitle);
+  view.appendChild(gameHeader);
 
-  const logo = document.createElement('div');
-  logo.className = 'home-logo';
-  logo.textContent = 'Reepo';
+  // === Player Stats Bar ===
+  const playerBar = document.createElement('div');
+  playerBar.className = 'home-player-bar';
 
-  const tagline = document.createElement('p');
-  tagline.className = 'home-tagline';
-  tagline.textContent = localization.t('app.tagline') || 'Discover GitHub Repositories';
+  const state = stateManager.getState();
+  const gamification = state.gamification || { xp: 0, level: 1, currentStreak: 0 };
+  const xpInLevel = gamification.xp % 100;
+  const xpMax = 100;
 
-  const description = document.createElement('p');
-  description.className = 'home-description';
-  description.textContent = 'Explore thousands of open-source projects. Press the big button or hit SPACE to discover a random repository instantly.';
+  // Level
+  const levelDiv = document.createElement('div');
+  levelDiv.className = 'player-level';
+  const levelBadge = document.createElement('div');
+  levelBadge.className = 'level-badge';
+  levelBadge.textContent = gamification.level;
+  const levelInfo = document.createElement('div');
+  levelInfo.className = 'level-info';
+  const levelLabel = document.createElement('span');
+  levelLabel.className = 'level-label';
+  levelLabel.textContent = 'LEVEL';
+  const levelNum = document.createElement('span');
+  levelNum.className = 'level-number';
+  levelNum.textContent = gamification.level;
+  levelInfo.appendChild(levelLabel);
+  levelInfo.appendChild(levelNum);
+  levelDiv.appendChild(levelBadge);
+  levelDiv.appendChild(levelInfo);
+  playerBar.appendChild(levelDiv);
 
-  hero.appendChild(logo);
-  hero.appendChild(tagline);
-  hero.appendChild(description);
+  // XP Bar
+  const xpDiv = document.createElement('div');
+  xpDiv.className = 'player-xp';
+  const xpTop = document.createElement('div');
+  xpTop.className = 'xp-top';
+  const xpLabel = document.createElement('span');
+  xpLabel.className = 'xp-label';
+  xpLabel.textContent = 'XP';
+  const xpValue = document.createElement('span');
+  xpValue.className = 'xp-value';
+  xpValue.textContent = `${gamification.xp} XP`;
+  xpTop.appendChild(xpLabel);
+  xpTop.appendChild(xpValue);
+  const xpBar = document.createElement('div');
+  xpBar.className = 'xp-bar';
+  const xpFill = document.createElement('div');
+  xpFill.className = 'xp-fill';
+  xpFill.style.width = `${Math.min((xpInLevel / xpMax) * 100, 100)}%`;
+  xpBar.appendChild(xpFill);
+  xpDiv.appendChild(xpTop);
+  xpDiv.appendChild(xpBar);
+  playerBar.appendChild(xpDiv);
 
-  // Ana CTA Butonu - Büyük ve belirgin
-  const ctaButton = document.createElement('button');
-  ctaButton.className = 'btn btn-primary home-cta';
-  ctaButton.innerHTML = '<span class="cta-icon">🎲</span> Discover Random Repository';
-  ctaButton.setAttribute('id', 'home-discover-btn');
-  ctaButton.addEventListener('click', () => {
-    startDiscovery();
-  });
+  // Streak
+  const streakDiv = document.createElement('div');
+  streakDiv.className = 'player-streak';
+  streakDiv.innerHTML = `🔥 ${gamification.currentStreak || 0} day streak`;
+  playerBar.appendChild(streakDiv);
 
-  hero.appendChild(ctaButton);
+  view.appendChild(playerBar);
 
-  // Boşluk tuşu ipucu
-  const spaceHint = document.createElement('p');
-  spaceHint.className = 'home-space-hint';
-  spaceHint.innerHTML = 'or press <kbd>Space</kbd> to discover';
-  hero.appendChild(spaceHint);
+  // === SPIN Button ===
+  const spinArea = document.createElement('div');
+  spinArea.className = 'home-spin-area';
 
-  view.appendChild(hero);
+  const spinBtn = document.createElement('button');
+  spinBtn.className = 'home-spin-btn';
+  spinBtn.innerHTML = '<span class="spin-icon">🎲</span><span class="spin-label">SPIN</span>';
+  spinBtn.addEventListener('click', startDiscovery);
 
-  // Quick Stats
-  const statsSection = document.createElement('div');
-  statsSection.className = 'home-stats';
+  const spinHint = document.createElement('p');
+  spinHint.className = 'spin-hint';
+  spinHint.innerHTML = 'or press <kbd>Space</kbd> to spin';
+
+  spinArea.appendChild(spinBtn);
+  spinArea.appendChild(spinHint);
+  view.appendChild(spinArea);
+
+  // === Quick Stats ===
+  const statsGrid = document.createElement('div');
+  statsGrid.className = 'home-stats-grid';
 
   const savedCount = collectionService.getSavedRepositories().length;
-  const historyCount = (stateManager.getState().discovery?.history || []).length;
+  const historyCount = (state.discovery?.history || []).length;
   const collectionsCount = collectionService.getCollections().length;
+  const viewCount = Object.values(state.viewCounts || {}).reduce((a, b) => a + b, 0);
 
   const stats = [
-    { icon: '📁', label: 'Saved Repos', value: savedCount },
-    { icon: '🕒', label: 'Viewed', value: historyCount },
-    { icon: '📚', label: 'Collections', value: collectionsCount },
-    { icon: '🏆', label: 'XP', value: stateManager.getState().gamification?.xp || 0 }
+    { icon: '📁', label: 'SAVED', value: savedCount },
+    { icon: '🕒', label: 'VIEWED', value: historyCount },
+    { icon: '📚', label: 'COLLECTIONS', value: collectionsCount },
+    { icon: '👁️', label: 'TOTAL VIEWS', value: viewCount }
   ];
 
   stats.forEach(stat => {
-    const card = document.createElement('div');
-    card.className = 'home-stat-card';
-    card.innerHTML = `
-      <span class="stat-icon">${stat.icon}</span>
-      <span class="stat-value">${stat.value}</span>
-      <span class="stat-label">${stat.label}</span>
+    const item = document.createElement('div');
+    item.className = 'home-stat-item';
+    item.innerHTML = `
+      <span class="stat-item-icon">${stat.icon}</span>
+      <span class="stat-item-value">${stat.value}</span>
+      <span class="stat-item-label">${stat.label}</span>
     `;
-    statsSection.appendChild(card);
+    statsGrid.appendChild(item);
   });
 
-  view.appendChild(statsSection);
+  view.appendChild(statsGrid);
 
-  // Advanced Filters Section (collapsible)
-  const filtersSection = document.createElement('div');
-  filtersSection.className = 'home-filters';
-
+  // === Advanced Filters Toggle ===
   const filtersToggle = document.createElement('button');
-  filtersToggle.className = 'btn btn-ghost home-filters-toggle';
-  filtersToggle.innerHTML = '<span>⚙️ Advanced Filters</span> <span class="toggle-arrow">▾</span>';
+  filtersToggle.className = 'home-filters-toggle';
+  filtersToggle.innerHTML = '⚙️ Advanced Filters';
   filtersToggle.addEventListener('click', () => {
-    const body = filtersSection.querySelector('.home-filters-body');
-    const isOpen = body.classList.toggle('open');
-    filtersToggle.querySelector('.toggle-arrow').textContent = isOpen ? '▴' : '▾';
+    const body = view.querySelector('.home-filters-body');
+    body.classList.toggle('open');
+    filtersToggle.textContent = body.classList.contains('open') ? '⚙️ Hide Filters' : '⚙️ Advanced Filters';
   });
+  view.appendChild(filtersToggle);
 
-  filtersSection.appendChild(filtersToggle);
-
+  // === Filters Body ===
   const filtersBody = document.createElement('div');
   filtersBody.className = 'home-filters-body';
 
-  // Language
-  const langGroup = document.createElement('div');
-  langGroup.className = 'filter-group';
-  const langLabel = document.createElement('label');
-  langLabel.className = 'filter-label';
-  langLabel.textContent = 'Language';
-  const langSelect = document.createElement('select');
-  langSelect.className = 'filter-select';
-  const langAll = document.createElement('option');
-  langAll.value = '';
-  langAll.textContent = 'All Languages';
-  langSelect.appendChild(langAll);
-  SUPPORTED_LANGUAGES.forEach(l => {
-    const opt = document.createElement('option');
-    opt.value = l;
-    opt.textContent = l;
-    langSelect.appendChild(opt);
-  });
-  langSelect.addEventListener('change', (e) => {
-    filterService.setFilter('language', e.target.value);
+  // Row 1: Language + Min Stars
+  const row1 = document.createElement('div');
+  row1.className = 'filter-row';
+
+  const langGroup = createFilterGroup('Language', 'select', '', SUPPORTED_LANGUAGES, (val) => {
+    filterService.setFilter('language', val);
     eventBus.emit(EVENTS.FILTER_APPLIED);
   });
-  langGroup.appendChild(langLabel);
-  langGroup.appendChild(langSelect);
-  filtersBody.appendChild(langGroup);
+  row1.appendChild(langGroup);
 
-  // Min Stars
-  const starsGroup = document.createElement('div');
-  starsGroup.className = 'filter-group';
-  const starsLabel = document.createElement('label');
-  starsLabel.className = 'filter-label';
-  starsLabel.textContent = 'Min Stars';
-  const starsInput = document.createElement('input');
-  starsInput.type = 'number';
-  starsInput.className = 'filter-input';
-  starsInput.min = 0;
-  starsInput.placeholder = '0';
-  starsInput.addEventListener('change', (e) => {
-    filterService.setFilter('minStars', parseInt(e.target.value) || 0);
+  const starsGroup = createFilterGroup('Min Stars', 'number', '0', null, (val) => {
+    filterService.setFilter('minStars', parseInt(val) || 0);
     eventBus.emit(EVENTS.FILTER_APPLIED);
   });
-  starsGroup.appendChild(starsLabel);
-  starsGroup.appendChild(starsInput);
-  filtersBody.appendChild(starsGroup);
+  row1.appendChild(starsGroup);
+  filtersBody.appendChild(row1);
 
-  // Updated Within
-  const updateGroup = document.createElement('div');
-  updateGroup.className = 'filter-group';
-  const updateLabel = document.createElement('label');
-  updateLabel.className = 'filter-label';
-  updateLabel.textContent = 'Updated Within';
-  const updateSelect = document.createElement('select');
-  updateSelect.className = 'filter-select';
-  UPDATE_RANGES.forEach(r => {
-    const opt = document.createElement('option');
-    opt.value = r.value;
-    opt.textContent = r.label;
-    updateSelect.appendChild(opt);
-  });
-  updateSelect.addEventListener('change', (e) => {
-    filterService.setFilter('updatedWithin', e.target.value);
+  // Row 2: Updated Within + Discovery Mode
+  const row2 = document.createElement('div');
+  row2.className = 'filter-row';
+
+  const updateGroup = createFilterGroup('Updated', 'select', 'any', UPDATE_RANGES.map(r => ({ value: r.value, label: r.label })), (val) => {
+    filterService.setFilter('updatedWithin', val);
     eventBus.emit(EVENTS.FILTER_APPLIED);
   });
-  updateGroup.appendChild(updateLabel);
-  updateGroup.appendChild(updateSelect);
-  filtersBody.appendChild(updateGroup);
+  row2.appendChild(updateGroup);
 
-  // Discovery Mode
-  const modeGroup = document.createElement('div');
-  modeGroup.className = 'filter-group';
-  const modeLabel = document.createElement('label');
-  modeLabel.className = 'filter-label';
-  modeLabel.textContent = 'Discovery Mode';
-  const modeSelect = document.createElement('select');
-  modeSelect.className = 'filter-select';
-  Object.entries(DISCOVERY_MODE_LABELS).forEach(([key, label]) => {
-    const opt = document.createElement('option');
-    opt.value = key;
-    opt.textContent = label;
-    modeSelect.appendChild(opt);
+  const modeGroup = createFilterGroup('Mode', 'select', state.discovery.mode, Object.entries(DISCOVERY_MODE_LABELS).map(([k, v]) => ({ value: k, label: v })), (val) => {
+    eventBus.emit(EVENTS.DISCOVERY_MODE_CHANGED, { mode: val });
   });
-  modeSelect.value = stateManager.getState().discovery.mode;
-  modeSelect.addEventListener('change', (e) => {
-    eventBus.emit(EVENTS.DISCOVERY_MODE_CHANGED, { mode: e.target.value });
-  });
-  modeGroup.appendChild(modeLabel);
-  modeGroup.appendChild(modeSelect);
-  filtersBody.appendChild(modeGroup);
+  row2.appendChild(modeGroup);
+  filtersBody.appendChild(row2);
 
   // Toggles
-  const togglesGroup = document.createElement('div');
-  togglesGroup.className = 'filter-toggles';
+  const toggles = document.createElement('div');
+  toggles.className = 'filter-toggles';
 
   const forkToggle = document.createElement('label');
   forkToggle.className = 'filter-toggle';
@@ -198,7 +191,7 @@ export function createHomeView() {
   });
   forkToggle.appendChild(forkCheck);
   forkToggle.appendChild(document.createTextNode(' Include Forks'));
-  togglesGroup.appendChild(forkToggle);
+  toggles.appendChild(forkToggle);
 
   const archToggle = document.createElement('label');
   archToggle.className = 'filter-toggle';
@@ -211,41 +204,82 @@ export function createHomeView() {
   });
   archToggle.appendChild(archCheck);
   archToggle.appendChild(document.createTextNode(' Include Archived'));
-  togglesGroup.appendChild(archToggle);
+  toggles.appendChild(archToggle);
 
-  filtersBody.appendChild(togglesGroup);
+  filtersBody.appendChild(toggles);
 
-  // Apply & Reset buttons
-  const filterActions = document.createElement('div');
-  filterActions.className = 'filter-actions';
+  // Actions
+  const actions = document.createElement('div');
+  actions.className = 'filter-actions';
 
   const applyBtn = document.createElement('button');
   applyBtn.className = 'btn btn-primary btn-small';
-  applyBtn.textContent = 'Apply Filters & Discover';
-  applyBtn.addEventListener('click', () => {
-    startDiscovery();
-  });
-  filterActions.appendChild(applyBtn);
+  applyBtn.textContent = '🎲 Spin with Filters';
+  applyBtn.addEventListener('click', startDiscovery);
+  actions.appendChild(applyBtn);
 
   const resetBtn = document.createElement('button');
   resetBtn.className = 'btn btn-ghost btn-small';
   resetBtn.textContent = 'Reset';
   resetBtn.addEventListener('click', () => {
     filterService.resetFilters();
-    langSelect.value = '';
-    starsInput.value = '';
-    updateSelect.value = 'any';
+    const selects = filtersBody.querySelectorAll('select');
+    selects.forEach(s => s.value = '');
+    const inputs = filtersBody.querySelectorAll('input[type="number"]');
+    inputs.forEach(i => i.value = '');
     forkCheck.checked = true;
     archCheck.checked = true;
     eventBus.emit(EVENTS.FILTER_RESET);
   });
-  filterActions.appendChild(resetBtn);
+  actions.appendChild(resetBtn);
 
-  filtersBody.appendChild(filterActions);
-  filtersSection.appendChild(filtersBody);
-  view.appendChild(filtersSection);
+  filtersBody.appendChild(actions);
+  view.appendChild(filtersBody);
 
   return view;
+}
+
+function createFilterGroup(label, type, defaultValue, options, onChange) {
+  const group = document.createElement('div');
+  group.className = 'filter-group';
+
+  const lbl = document.createElement('label');
+  lbl.className = 'filter-label';
+  lbl.textContent = label;
+  group.appendChild(lbl);
+
+  if (type === 'select') {
+    const select = document.createElement('select');
+    select.className = 'filter-select';
+    const allOpt = document.createElement('option');
+    allOpt.value = '';
+    allOpt.textContent = `All ${label}`;
+    select.appendChild(allOpt);
+    (options || []).forEach(opt => {
+      const el = document.createElement('option');
+      if (typeof opt === 'string') {
+        el.value = opt;
+        el.textContent = opt;
+      } else {
+        el.value = opt.value;
+        el.textContent = opt.label;
+      }
+      if (el.value === defaultValue) el.selected = true;
+      select.appendChild(el);
+    });
+    select.addEventListener('change', (e) => onChange(e.target.value));
+    group.appendChild(select);
+  } else {
+    const input = document.createElement('input');
+    input.type = type;
+    input.className = 'filter-input';
+    input.value = defaultValue;
+    input.placeholder = '0';
+    input.addEventListener('change', (e) => onChange(e.target.value));
+    group.appendChild(input);
+  }
+
+  return group;
 }
 
 function startDiscovery() {
