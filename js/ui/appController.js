@@ -9,11 +9,13 @@ import { createHistoryPanel } from './historyPanel.js';
 import { createDiscoveryModeSelector } from './discoveryModeSelector.js';
 import { createProfileView } from './profileView.js';
 import { createProfileEditor } from './profileEditor.js';
+import { createStatisticsDashboard } from './statisticsDashboard.js';
 
 import { initializeCollectionsFeature } from '../features/collections/index.js';
 import { initializeFiltersFeature } from '../features/filters/index.js';
 import { initializeSearchFeature } from '../features/search/index.js';
 import { initializeProfileFeature } from '../features/profile/index.js';
+import { initializeStatisticsFeature } from '../features/statistics/index.js';
 import { openRepoFromHistory, clearHistory, removeFromHistory } from '../features/discovery.js';
 
 import { localization } from '../core/localization.js';
@@ -22,7 +24,7 @@ import { collectionService } from '../services/collectionService.js';
 import { filterService } from '../services/filterService.js';
 import { profileService } from '../services/profileService.js';
 
-let collectionsFeature, filtersFeature, searchFeature, profileFeature;
+let collectionsFeature, filtersFeature, searchFeature, profileFeature, statisticsFeature;
 let historyVisible = false;
 
 export function initializeAppController() {
@@ -30,6 +32,7 @@ export function initializeAppController() {
   const collectionsBtn = document.getElementById('collections-btn');
   const filterToggleBtn = document.getElementById('filter-toggle-btn');
   const historyToggleBtn = document.getElementById('history-toggle-btn');
+  const dashboardBtn = document.getElementById('dashboard-btn');
   
   // Profil DOM Elementleri
   const profileBtn = document.getElementById('profile-btn');
@@ -42,6 +45,7 @@ export function initializeAppController() {
   filtersFeature = initializeFiltersFeature(() => {});
   searchFeature = initializeSearchFeature();
   profileFeature = initializeProfileFeature();
+  statisticsFeature = initializeStatisticsFeature();
 
   // --- Profil Modal Mantığı ---
   profileBtn?.addEventListener('click', () => {
@@ -130,6 +134,11 @@ export function initializeAppController() {
     eventBus.emit(EVENTS.VIEW_CHANGED, { view: nextView });
   });
 
+  dashboardBtn?.addEventListener('click', () => {
+    stateManager.setState('currentView', 'dashboard');
+    eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'dashboard' });
+  });
+
   // --- Filtre Paneli Aç/Kapa ---
   filterToggleBtn?.addEventListener('click', () => {
     const panel = document.getElementById('filter-panel-container');
@@ -178,6 +187,9 @@ export function initializeAppController() {
     if (view === 'collections') {
       renderCollectionsView(mainContent);
       if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.discovery');
+    } else if (view === 'dashboard') {
+      renderDashboard(mainContent);
+      if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.collections');
     } else {
       if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.collections');
       eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
@@ -281,6 +293,15 @@ function renderCollectionsView(container) {
   const collections = collectionService.getCollections();
   const savedRepos = collectionService.getSavedRepositories();
   container.appendChild(createCollectionsView(collections, savedRepos));
+}
+
+function renderDashboard(container) {
+  if (!container) return;
+  container.innerHTML = '';
+  const stats = statisticsFeature?.getStatsData?.() || {};
+  const dashboard = createStatisticsDashboard(stats, statisticsFeature?.exportStats);
+  container.appendChild(dashboard);
+  eventBus.emit(EVENTS.DASHBOARD_OPENED);
 }
 
 function renderFilterPanel() {
