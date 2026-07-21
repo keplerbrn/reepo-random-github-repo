@@ -1,5 +1,7 @@
 export const CONFIG = {
   APP_NAME: 'Reepo',
+  VERSION: '1.0.0',
+  BUILD_DATE: '2026-07-21',
   DEFAULT_LANGUAGE: 'en',
   STORAGE_PREFIX: 'reepo_',
   REPOSITORY_DATA_PATH: 'data/repos.json',

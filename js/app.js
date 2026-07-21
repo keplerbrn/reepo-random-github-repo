@@ -17,6 +17,7 @@ import { stateManager } from './core/stateManager.js';
 class App {
   constructor() {
     this.initialized = false;
+    this.deferredPrompt = null;
   }
 
   async initialize() {
@@ -46,6 +47,9 @@ class App {
       initializeAppController();
       initializeInteractions();
       
+      this.registerServiceWorker();
+      this.listenInstallPrompt();
+
       this.initialized = true;
       eventBus.emit(EVENTS.APP_INITIALIZED);
       
@@ -62,6 +66,28 @@ class App {
     if (taglineEl) taglineEl.textContent = localization.t('app.tagline');
     const footerEl = document.getElementById('footer-text');
     if (footerEl) footerEl.textContent = localization.t('app.footer');
+  }
+
+  registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then((reg) => console.log('SW registered:', reg.scope))
+          .catch((err) => console.log('SW registration failed:', err));
+      });
+    }
+  }
+
+  listenInstallPrompt() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('PWA installed');
+      this.deferredPrompt = null;
+    });
   }
 }
 
