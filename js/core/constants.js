@@ -32,60 +32,44 @@ export const EVENTS = {
   FILTER_APPLIED: 'FILTER_APPLIED',
   FILTER_REMOVED: 'FILTER_REMOVED',
   FILTER_PANEL_OPENED: 'FILTER_PANEL_OPENED',
-  FILTER_PANEL_CLOSED: 'FILTER_PANEL_CLOSED'
-};
-
-export const FEATURE_IDS = {
-  DISC_001: 'DISC-001',
-  CARD_001: 'CARD-001',
-  CARD_002: 'CARD-002',
-  CARD_003: 'CARD-003',
-  CARD_004: 'CARD-004',
-  COL_001: 'COL-001',
-  COL_002: 'COL-002',
-  COL_003: 'COL-003',
-  COL_004: 'COL-004',
-  COL_005: 'COL-005',
-  COL_006: 'COL-006',
-  FIL_001: 'FIL-001',
-  FIL_002: 'FIL-002',
-  FIL_003: 'FIL-003',
-  FIL_004: 'FIL-004',
-  FIL_005: 'FIL-005',
-  FIL_006: 'FIL-006',
-  FIL_007: 'FIL-007',
-  FIL_008: 'FIL-008'
-};
-
-export const THRESHOLDS = {
-  POPULAR_STARS: 10000,
-  RECENTLY_UPDATED_DAYS: 7
+  FILTER_PANEL_CLOSED: 'FILTER_PANEL_CLOSED',
+  SEARCH_STARTED: 'SEARCH_STARTED',
+  SEARCH_COMPLETED: 'SEARCH_COMPLETED',
+  SEARCH_CLEARED: 'SEARCH_CLEARED',
+  DISCOVERY_MODE_CHANGED: 'DISCOVERY_MODE_CHANGED',
+  DISCOVERY_QUEUE_UPDATED: 'DISCOVERY_QUEUE_UPDATED',
+  HISTORY_OPENED: 'HISTORY_OPENED',
+  HISTORY_CLEARED: 'HISTORY_CLEARED',
+  RECENT_VIEW_UPDATED: 'RECENT_VIEW_UPDATED'
 };
 
 export const DISCOVERY_MODES = {
-  RANDOM: 'random'
+  RANDOM: 'random',
+  LEAST_VIEWED: 'leastViewed',
+  RECENTLY_UPDATED: 'recentlyUpdated',
+  POPULAR: 'popular'
+};
+
+export const DISCOVERY_MODE_LABELS = {
+  random: 'Random',
+  leastViewed: 'Least Viewed',
+  recentlyUpdated: 'Recently Updated',
+  popular: 'Popular'
 };
 
 export const RECENT_REPOS_LIMIT = 10;
+export const QUEUE_SIZE = 5;
 
 export const STORAGE_KEYS = {
   SAVED_REPOSITORIES: 'savedRepositories',
   REACTIONS: 'reactions',
   COLLECTIONS: 'collections',
-  FILTERS: 'filters'
+  FILTERS: 'filters',
+  DISCOVERY_HISTORY: 'discoveryHistory',
+  RECENTLY_VIEWED: 'recentlyViewed',
+  DISCOVERY_MODE: 'discoveryMode',
+  VIEW_COUNTS: 'viewCounts'
 };
-
-export const SUPPORTED_LANGUAGES = [
-  'JavaScript', 'TypeScript', 'Python', 'Go', 'Rust',
-  'Java', 'C#', 'C++', 'PHP', 'Swift', 'Kotlin'
-];
-
-export const UPDATE_RANGES = [
-  { value: 'any', label: 'Any time' },
-  { value: 'month', label: 'Last Month' },
-  { value: '6months', label: 'Last 6 Months' },
-  { value: 'year', label: 'Last Year' }
-];
 
 export const DEFAULT_FILTERS = {
   language: '',
@@ -99,36 +83,26 @@ export const DEFAULT_FILTERS = {
 
 export const DEFAULT_STATE = {
   user: null,
-  repository: {
-    current: null,
-    loading: false,
-    error: null
-  },
+  repository: { current: null, loading: false, error: null },
   discovery: {
     currentRepository: null,
     history: [],
     count: 0,
     sessionStart: null,
-    mode: DISCOVERY_MODES.RANDOM
+    mode: DISCOVERY_MODES.RANDOM,
+    queue: []
   },
   collections: [],
   savedRepositories: [],
   reactions: {},
   filters: { ...DEFAULT_FILTERS },
+  viewCounts: {},
+  recentlyViewed: [],
+  search: { query: '', results: [] },
   statistics: {},
   gamification: {},
-  settings: {
-    theme: 'dark',
-    language: 'en',
-    animations: true,
-    sound: false,
-    compactMode: false
-  },
-  localization: {
-    activeLanguage: 'en'
-  },
-  session: {
-    startTime: null
-  },
+  settings: { theme: 'dark', language: 'en', animations: true, sound: false, compactMode: false },
+  localization: { activeLanguage: 'en' },
+  session: { startTime: null },
   currentView: 'discovery'
 };

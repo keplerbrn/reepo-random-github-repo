@@ -68,5 +68,17 @@ export const en = {
     includeArchived: 'Include Archived',
     license: 'License',
     topics: 'Topics (comma separated)'
+  },
+  search: { 
+    placeholder: 'Search repositories...', 
+    clear: 'Clear search' 
+  },
+  history: { 
+    title: 'History', 
+    clear: 'Clear All', 
+    recent: 'Recent', 
+    recentlyViewed: 'Recently Viewed', 
+    discoveryHistory: 'Discovery History', 
+    empty: 'No history yet.' 
   }
 };

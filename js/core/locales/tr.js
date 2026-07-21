@@ -68,5 +68,17 @@ export const tr = {
     includeArchived: 'Arşivlenmiş Dahil',
     license: 'Lisans',
     topics: 'Konular (virgülle ayırın)'
+  },
+  search: { 
+    placeholder: 'Depolarda ara...', 
+    clear: 'Aramayı temizle' 
+  },
+  history: { 
+    title: 'Geçmiş', 
+    clear: 'Tümünü Sil', 
+    recent: 'Yeni', 
+    recentlyViewed: 'Son Görüntülenenler', 
+    discoveryHistory: 'Keşif Geçmişi', 
+    empty: 'Henüz geçmiş yok.' 
   }
 };
