@@ -9,6 +9,8 @@ import { collectionService } from './services/collectionService.js';
 import { reactionService } from './services/reactionService.js';
 import { filterService } from './services/filterService.js';
 import { profileService } from './services/profileService.js';
+import { gamificationService } from './core/gamificationService.js';
+import { initializeGamification } from './features/gamification/index.js';
 
 class App {
   constructor() {
@@ -25,6 +27,8 @@ class App {
       reactionService.init();
       filterService.init();
       profileService.init();
+      gamificationService.init();
+      initializeGamification();
       
       this.updateStaticTexts();
       

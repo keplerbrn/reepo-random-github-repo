@@ -47,7 +47,13 @@ export const EVENTS = {
   PROFILE_IMPORTED: 'PROFILE_IMPORTED',
   PROFILE_EXPORTED: 'PROFILE_EXPORTED',
   PROFILE_OPENED: 'PROFILE_OPENED',
-  PROFILE_CLOSED: 'PROFILE_CLOSED'
+  PROFILE_CLOSED: 'PROFILE_CLOSED',
+  XP_GAINED: 'XP_GAINED',
+  LEVEL_UP: 'LEVEL_UP',
+  BADGE_UNLOCKED: 'BADGE_UNLOCKED',
+  ACHIEVEMENT_UNLOCKED: 'ACHIEVEMENT_UNLOCKED',
+  QUEST_COMPLETED: 'QUEST_COMPLETED',
+  STREAK_UPDATED: 'STREAK_UPDATED'
 };
 
 export const DISCOVERY_MODES = {
@@ -79,7 +85,8 @@ export const STORAGE_KEYS = {
   DISCOVERY_MODE: 'discoveryMode',
   VIEW_COUNTS: 'viewCounts',
   USER_PROFILE: 'userProfile',
-  ACTIVITY_LOG: 'activityLog'
+  ACTIVITY_LOG: 'activityLog',
+  GAMIFICATION: 'gamification'
 };
 
 export const DEFAULT_FILTERS = {
@@ -117,7 +124,17 @@ export const DEFAULT_STATE = {
   recentlyViewed: [],
   search: { query: '', results: [] },
   statistics: {},
-  gamification: {},
+  gamification: {
+    xp: 0,
+    level: 1,
+    badges: [],
+    achievements: [],
+    currentStreak: 0,
+    longestStreak: 0,
+    lastActivityDate: null,
+    dailyQuests: [],
+    questsCompletedToday: 0
+  },
   settings: { theme: 'dark', language: 'en', animations: true, sound: false, compactMode: false },
   localization: { activeLanguage: 'en' },
   session: { startTime: null },
