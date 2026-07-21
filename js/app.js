@@ -17,6 +17,9 @@ class App {
       // Initialize core modules
       localization.setLanguage(CONFIG.DEFAULT_LANGUAGE);
       
+      // Update HTML static texts with localized strings
+      this.updateStaticTexts();
+      
       // Initialize features
       await initializeDiscovery();
       
@@ -32,6 +35,17 @@ class App {
     } catch (error) {
       console.error('Failed to initialize Reepo:', error);
     }
+  }
+
+  updateStaticTexts() {
+    const titleEl = document.getElementById('page-title');
+    if (titleEl) titleEl.textContent = localization.t('app.pageTitle');
+    
+    const taglineEl = document.getElementById('app-tagline');
+    if (taglineEl) taglineEl.textContent = localization.t('app.tagline');
+    
+    const footerEl = document.getElementById('footer-text');
+    if (footerEl) footerEl.textContent = localization.t('app.footer');
   }
 }
 

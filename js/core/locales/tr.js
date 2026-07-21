@@ -1,12 +1,15 @@
 export const tr = {
   app: {
     title: 'Reepo',
-    tagline: 'GitHub Repolarını Keşfet'
+    tagline: 'GitHub Repolarını Keşfet',
+    footer: 'Reepo v1.0 — Beklenmeyeni keşfet. Dikkate değer olanı kaydet. Tekrarla.',
+    pageTitle: 'Reepo - GitHub Repolarını Keşfet'
   },
   discovery: {
     loading: 'Depo keşfediliyor...',
     error: 'Depo yüklenemedi',
-    retry: 'Tekrar Dene'
+    retry: 'Tekrar Dene',
+    noRepository: 'Kullanılabilir depo yok'
   },
   card: {
     stars: '{count} yıldız',
@@ -22,6 +25,7 @@ export const tr = {
     fork: 'Çatal',
     template: 'Şablon',
     popular: 'Popüler',
-    new: 'Yeni'
+    new: 'Yeni',
+    verified: 'Doğrulanmış depo'
   }
 };

@@ -28,11 +28,7 @@ class RepositoryService {
         };
       }
       
-      this.repositories = validation.validCount > 0 ? data.filter(repo => {
-        const result = validateRepositories([repo]);
-        return result.valid;
-      }) : [];
-      
+      this.repositories = data;
       this.loaded = true;
       
       return {

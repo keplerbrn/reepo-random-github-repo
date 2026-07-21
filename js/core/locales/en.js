@@ -1,12 +1,15 @@
 export const en = {
   app: {
     title: 'Reepo',
-    tagline: 'Discover GitHub Repositories'
+    tagline: 'Discover GitHub Repositories',
+    footer: 'Reepo v1.0 — Explore the unexpected. Save the remarkable. Repeat.',
+    pageTitle: 'Reepo - Discover GitHub Repositories'
   },
   discovery: {
     loading: 'Discovering repository...',
     error: 'Failed to load repository',
-    retry: 'Try Again'
+    retry: 'Try Again',
+    noRepository: 'No repository available'
   },
   card: {
     stars: '{count} stars',
@@ -22,6 +25,7 @@ export const en = {
     fork: 'Fork',
     template: 'Template',
     popular: 'Popular',
-    new: 'New'
+    new: 'New',
+    verified: 'Verified repository'
   }
 };

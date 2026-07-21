@@ -16,6 +16,10 @@ export const FEATURE_IDS = {
   COL_001: 'COL-001'
 };
 
+export const THRESHOLDS = {
+  POPULAR_STARS: 10000
+};
+
 export const DEFAULT_STATE = {
   user: null,
   repository: {

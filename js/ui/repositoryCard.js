@@ -2,6 +2,7 @@ import { formatNumber } from '../utils/formatting.js';
 import { getDaysAgo } from '../utils/dateUtils.js';
 import { truncateText } from '../utils/formatting.js';
 import { localization } from '../core/localization.js';
+import { THRESHOLDS } from '../core/constants.js';
 
 export function createRepositoryCard(repository) {
   if (!repository) {
@@ -27,8 +28,9 @@ export function createRepositoryCard(repository) {
   
   const verificationBadge = document.createElement('span');
   verificationBadge.className = 'verification-badge';
-  verificationBadge.setAttribute('aria-label', 'Verified repository');
-  verificationBadge.innerHTML = '✓';
+  verificationBadge.setAttribute('aria-label', localization.t('status.verified'));
+  verificationBadge.setAttribute('role', 'img');
+  verificationBadge.innerHTML = '<span aria-hidden="true">✓</span>';
   
   header.appendChild(repoName);
   header.appendChild(owner);
@@ -103,7 +105,7 @@ export function createRepositoryCard(repository) {
     statusIndicators.appendChild(forkBadge);
   }
   
-  if (repository.stars > 10000) {
+  if (repository.stars > THRESHOLDS.POPULAR_STARS) {
     const popularBadge = document.createElement('span');
     popularBadge.className = 'status-badge popular';
     popularBadge.textContent = localization.t('status.popular');
@@ -171,11 +173,12 @@ function createButton(text, variant = 'primary', onClick) {
 function createEmptyCard() {
   const card = document.createElement('article');
   card.className = 'repository-card empty';
-  card.setAttribute('role', 'article');
+  card.setAttribute('role', 'status');
+  card.setAttribute('aria-label', localization.t('discovery.noRepository'));
   
   const message = document.createElement('p');
   message.className = 'empty-message';
-  message.textContent = 'No repository available';
+  message.textContent = localization.t('discovery.noRepository');
   
   card.appendChild(message);
   return card;
