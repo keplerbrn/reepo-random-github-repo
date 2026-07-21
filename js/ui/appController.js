@@ -28,8 +28,12 @@ import { filterService } from '../services/filterService.js';
 import { profileService } from '../services/profileService.js';
 
 let collectionsFeature, filtersFeature, searchFeature, profileFeature, statisticsFeature, settingsFeature;
+let isInitialized = false;
 
 export function initializeAppController() {
+  if (isInitialized) return;
+  isInitialized = true;
+
   const mainContent = document.getElementById('main-content');
   
   // Header buttons
@@ -179,11 +183,6 @@ export function initializeAppController() {
     stateManager.setState('currentView', nextView);
     eventBus.emit(EVENTS.VIEW_CHANGED, { view: nextView });
     filterToggleBtn.classList.toggle('active', nextView === 'filters');
-    if (nextView === 'filters') {
-      eventBus.emit(EVENTS.FILTER_PANEL_OPENED);
-    } else {
-      eventBus.emit(EVENTS.FILTER_PANEL_CLOSED);
-    }
   });
 
   historyToggleBtn?.addEventListener('click', () => {
@@ -192,9 +191,6 @@ export function initializeAppController() {
     stateManager.setState('currentView', nextView);
     eventBus.emit(EVENTS.VIEW_CHANGED, { view: nextView });
     historyToggleBtn.classList.toggle('active', nextView === 'history');
-    if (nextView === 'history') {
-      eventBus.emit(EVENTS.HISTORY_OPENED);
-    }
   });
 
   // --- Search Bar ---
@@ -204,6 +200,9 @@ export function initializeAppController() {
     searchContainer.appendChild(searchBar);
   }
 
+  // --- Discovery Mode Bar (footer) ---
+  renderDiscoveryModeBar();
+
   // --- Event Listeners ---
   eventBus.on(EVENTS.DISCOVERY_LOADING, () => {
     if (stateManager.getState().currentView === 'discovery') showLoading(mainContent);
@@ -211,7 +210,6 @@ export function initializeAppController() {
 
   eventBus.on(EVENTS.DISCOVERY_COMPLETED, (data) => {
     if (stateManager.getState().currentView === 'discovery') renderRepository(mainContent, data.repository);
-    renderDiscoveryModeBar();
   });
 
   eventBus.on(EVENTS.DISCOVERY_FAILED, (data) => {
@@ -238,11 +236,12 @@ export function initializeAppController() {
       renderHistoryPage(mainContent);
       historyToggleBtn?.classList.add('active');
     } else {
-      // discovery
+      // discovery - sadece REQUEST_NEXT_REPOSITORY fırlat
       eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
     }
   });
 
+  // Collections events
   [EVENTS.COLLECTION_CREATED, EVENTS.COLLECTION_UPDATED, EVENTS.COLLECTION_DELETED,
    EVENTS.REPOSITORY_SAVED, EVENTS.REPOSITORY_REMOVED, EVENTS.IMPORT_COMPLETED].forEach(ev => {
     eventBus.on(ev, () => {
@@ -277,10 +276,13 @@ export function initializeAppController() {
         s = 'Space';
         const cv = stateManager.getState().currentView;
         if (cv === 'home') {
+          // Home'dan discovery'e geç
           stateManager.setState('currentView', 'discovery');
           eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
+        } else if (cv === 'discovery') {
+          // Discovery'deyken direkt yeni repo iste
+          eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
         }
-        eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
         break;
       case 'Escape':
         s = 'ESC';
@@ -351,7 +353,22 @@ function renderCollectionsView(container) {
   container.innerHTML = '';
   const collections = collectionService.getCollections();
   const savedRepos = collectionService.getSavedRepositories();
-  container.appendChild(createCollectionsView(collections, savedRepos));
+  // createCollectionsView expects: collections, savedRepos, statsMap, onSearch, onSort, onCreateCollection, onRenameCollection, onDeleteCollection, onSelectCollection, onRemoveRepo, onExport, onImport
+  const view = createCollectionsView(
+    collections,
+    savedRepos,
+    {}, // statsMap
+    () => {}, // onSearch
+    () => {}, // onSort
+    () => eventBus.emit(EVENTS.COLLECTION_CREATED), // onCreateCollection
+    () => {}, // onRenameCollection
+    () => {}, // onDeleteCollection
+    () => {}, // onSelectCollection
+    () => {}, // onRemoveRepo
+    () => {}, // onExport
+    () => {}  // onImport
+  );
+  container.appendChild(view);
 }
 
 function renderDashboard(container) {

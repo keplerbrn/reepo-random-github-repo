@@ -24,6 +24,7 @@ class App {
     if (this.initialized) return;
     
     try {
+      // 1. Önce servisleri başlat
       localization.setLanguage(CONFIG.DEFAULT_LANGUAGE);
       
       collectionService.init();
@@ -37,21 +38,32 @@ class App {
       localization.setLanguage(stateManager.getState().settings.language);
       this.updateStaticTexts();
 
+      // 2. Dil değişikliği dinleyicisi
       eventBus.on(EVENTS.LANGUAGE_CHANGED, ({ language }) => {
         localization.setLanguage(language);
         this.updateStaticTexts();
-        eventBus.emit(EVENTS.VIEW_CHANGED, { view: stateManager.getState().currentView });
       });
       
+      // 3. Discovery'yi başlat (sadece event dinleyicilerini kaydeder)
       await startDiscovery();
+      
+      // 4. UI kontrolcüsünü başlat (view'leri render eder)
       initializeAppController();
+      
+      // 5. Interaksiyonları başlat (buton tıklamaları vs)
       initializeInteractions();
       
+      // 6. PWA
       this.registerServiceWorker();
       this.listenInstallPrompt();
 
       this.initialized = true;
+      
+      // 7. Uygulama hazır - HOME view gösterilecek
       eventBus.emit(EVENTS.APP_INITIALIZED);
+      
+      // 8. Home view'i göster (currentView zaten 'home')
+      eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'home' });
       
       console.log('Reepo initialized successfully');
     } catch (error) {
@@ -60,12 +72,8 @@ class App {
   }
 
   updateStaticTexts() {
-    const titleEl = document.getElementById('page-title');
-    if (titleEl) titleEl.textContent = localization.t('app.pageTitle');
-    const taglineEl = document.getElementById('app-tagline');
-    if (taglineEl) taglineEl.textContent = localization.t('app.tagline');
     const footerEl = document.getElementById('footer-text');
-    if (footerEl) footerEl.textContent = localization.t('app.footer');
+    if (footerEl) footerEl.textContent = localization.t('app.footer') || 'Reepo v2';
   }
 
   registerServiceWorker() {
@@ -83,7 +91,6 @@ class App {
       e.preventDefault();
       this.deferredPrompt = e;
     });
-
     window.addEventListener('appinstalled', () => {
       console.log('PWA installed');
       this.deferredPrompt = null;

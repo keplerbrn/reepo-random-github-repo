@@ -4,6 +4,12 @@ import { EVENTS, SUPPORTED_LANGUAGES, UPDATE_RANGES, DISCOVERY_MODE_LABELS } fro
 import { filterService } from '../services/filterService.js';
 import { collectionService } from '../services/collectionService.js';
 import { stateManager } from '../core/stateManager.js';
+import { createRepositoryCard } from './repositoryCard.js';
+import { reactionService } from '../services/reactionService.js';
+
+let currentRepo = null;
+let currentReaction = null;
+let currentSaved = false;
 
 export function createHomeView() {
   const view = document.createElement('div');
@@ -31,7 +37,6 @@ export function createHomeView() {
   const xpInLevel = gamification.xp % 100;
   const xpMax = 100;
 
-  // Level
   const levelDiv = document.createElement('div');
   levelDiv.className = 'player-level';
   const levelBadge = document.createElement('div');
@@ -51,7 +56,6 @@ export function createHomeView() {
   levelDiv.appendChild(levelInfo);
   playerBar.appendChild(levelDiv);
 
-  // XP Bar
   const xpDiv = document.createElement('div');
   xpDiv.className = 'player-xp';
   const xpTop = document.createElement('div');
@@ -74,12 +78,10 @@ export function createHomeView() {
   xpDiv.appendChild(xpBar);
   playerBar.appendChild(xpDiv);
 
-  // Streak
   const streakDiv = document.createElement('div');
   streakDiv.className = 'player-streak';
   streakDiv.innerHTML = `🔥 ${gamification.currentStreak || 0} day streak`;
   playerBar.appendChild(streakDiv);
-
   view.appendChild(playerBar);
 
   // === SPIN Button ===
@@ -88,8 +90,9 @@ export function createHomeView() {
 
   const spinBtn = document.createElement('button');
   spinBtn.className = 'home-spin-btn';
+  spinBtn.id = 'home-spin-btn';
   spinBtn.innerHTML = '<span class="spin-icon">🎲</span><span class="spin-label">SPIN</span>';
-  spinBtn.addEventListener('click', startDiscovery);
+  spinBtn.addEventListener('click', () => handleSpin(view, spinBtn));
 
   const spinHint = document.createElement('p');
   spinHint.className = 'spin-hint';
@@ -99,9 +102,16 @@ export function createHomeView() {
   spinArea.appendChild(spinHint);
   view.appendChild(spinArea);
 
+  // === Result Container (repo burada görünecek) ===
+  const resultContainer = document.createElement('div');
+  resultContainer.className = 'home-result';
+  resultContainer.id = 'home-result';
+  view.appendChild(resultContainer);
+
   // === Quick Stats ===
   const statsGrid = document.createElement('div');
   statsGrid.className = 'home-stats-grid';
+  statsGrid.id = 'home-stats';
 
   const savedCount = collectionService.getSavedRepositories().length;
   const historyCount = (state.discovery?.history || []).length;
@@ -125,7 +135,6 @@ export function createHomeView() {
     `;
     statsGrid.appendChild(item);
   });
-
   view.appendChild(statsGrid);
 
   // === Advanced Filters Toggle ===
@@ -143,16 +152,13 @@ export function createHomeView() {
   const filtersBody = document.createElement('div');
   filtersBody.className = 'home-filters-body';
 
-  // Row 1: Language + Min Stars
   const row1 = document.createElement('div');
   row1.className = 'filter-row';
-
   const langGroup = createFilterGroup('Language', 'select', '', SUPPORTED_LANGUAGES, (val) => {
     filterService.setFilter('language', val);
     eventBus.emit(EVENTS.FILTER_APPLIED);
   });
   row1.appendChild(langGroup);
-
   const starsGroup = createFilterGroup('Min Stars', 'number', '0', null, (val) => {
     filterService.setFilter('minStars', parseInt(val) || 0);
     eventBus.emit(EVENTS.FILTER_APPLIED);
@@ -160,26 +166,21 @@ export function createHomeView() {
   row1.appendChild(starsGroup);
   filtersBody.appendChild(row1);
 
-  // Row 2: Updated Within + Discovery Mode
   const row2 = document.createElement('div');
   row2.className = 'filter-row';
-
   const updateGroup = createFilterGroup('Updated', 'select', 'any', UPDATE_RANGES.map(r => ({ value: r.value, label: r.label })), (val) => {
     filterService.setFilter('updatedWithin', val);
     eventBus.emit(EVENTS.FILTER_APPLIED);
   });
   row2.appendChild(updateGroup);
-
   const modeGroup = createFilterGroup('Mode', 'select', state.discovery.mode, Object.entries(DISCOVERY_MODE_LABELS).map(([k, v]) => ({ value: k, label: v })), (val) => {
     eventBus.emit(EVENTS.DISCOVERY_MODE_CHANGED, { mode: val });
   });
   row2.appendChild(modeGroup);
   filtersBody.appendChild(row2);
 
-  // Toggles
   const toggles = document.createElement('div');
   toggles.className = 'filter-toggles';
-
   const forkToggle = document.createElement('label');
   forkToggle.className = 'filter-toggle';
   const forkCheck = document.createElement('input');
@@ -192,7 +193,6 @@ export function createHomeView() {
   forkToggle.appendChild(forkCheck);
   forkToggle.appendChild(document.createTextNode(' Include Forks'));
   toggles.appendChild(forkToggle);
-
   const archToggle = document.createElement('label');
   archToggle.className = 'filter-toggle';
   const archCheck = document.createElement('input');
@@ -205,19 +205,15 @@ export function createHomeView() {
   archToggle.appendChild(archCheck);
   archToggle.appendChild(document.createTextNode(' Include Archived'));
   toggles.appendChild(archToggle);
-
   filtersBody.appendChild(toggles);
 
-  // Actions
   const actions = document.createElement('div');
   actions.className = 'filter-actions';
-
   const applyBtn = document.createElement('button');
   applyBtn.className = 'btn btn-primary btn-small';
   applyBtn.textContent = '🎲 Spin with Filters';
-  applyBtn.addEventListener('click', startDiscovery);
+  applyBtn.addEventListener('click', () => handleSpin(view, spinBtn));
   actions.appendChild(applyBtn);
-
   const resetBtn = document.createElement('button');
   resetBtn.className = 'btn btn-ghost btn-small';
   resetBtn.textContent = 'Reset';
@@ -232,17 +228,110 @@ export function createHomeView() {
     eventBus.emit(EVENTS.FILTER_RESET);
   });
   actions.appendChild(resetBtn);
-
   filtersBody.appendChild(actions);
   view.appendChild(filtersBody);
 
   return view;
 }
 
+// === SPIN Animation Logic ===
+async function handleSpin(view, spinBtn) {
+  if (spinBtn.disabled) return; // Prevent double-click
+  
+  // 1. Disable button + start animation
+  spinBtn.disabled = true;
+  spinBtn.classList.add('spinning');
+  
+  // 2. Dice rolling animation - change icon rapidly
+  const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅', '🎲'];
+  const spinIcon = spinBtn.querySelector('.spin-icon');
+  const spinLabel = spinBtn.querySelector('.spin-label');
+  spinLabel.textContent = 'ROLLING...';
+  
+  const startTime = Date.now();
+  const duration = 1800; // 1.8 seconds of animation
+  
+  const rollInterval = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    // Slow down as we approach the end
+    const slowdown = Math.min(elapsed / duration, 1);
+    const faceIndex = Math.floor(Math.random() * diceFaces.length);
+    spinIcon.textContent = diceFaces[faceIndex];
+    
+    if (elapsed >= duration) {
+      clearInterval(rollInterval);
+    }
+  }, 60);
+
+  // 3. Wait for animation, then load repo
+  await new Promise(resolve => setTimeout(resolve, duration));
+  
+  // 4. Fetch the repository
+  const repo = await fetchRandomRepo();
+  
+  // 5. Show result in the same page
+  const resultContainer = view.querySelector('#home-result');
+  const statsGrid = view.querySelector('#home-stats');
+  
+  if (repo) {
+    // Hide stats, show repo card
+    statsGrid.style.display = 'none';
+    resultContainer.innerHTML = '';
+    const card = createRepositoryCard(repo, reactionService.getReaction(repo.id), collectionService.isSaved(repo.id));
+    resultContainer.appendChild(card);
+    resultContainer.classList.add('has-result');
+    
+    // Update current repo reference
+    currentRepo = repo;
+    currentReaction = reactionService.getReaction(repo.id);
+    currentSaved = collectionService.isSaved(repo.id);
+    
+    // Update spin button for "SPIN AGAIN"
+    spinIcon.textContent = '🎲';
+    spinLabel.textContent = 'SPIN AGAIN';
+  } else {
+    // Error - show message
+    resultContainer.innerHTML = '<div class="empty-state">No repositories found. Try adjusting filters.</div>';
+    resultContainer.classList.add('has-result');
+    spinIcon.textContent = '🎲';
+    spinLabel.textContent = 'TRY AGAIN';
+  }
+  
+  // 6. Re-enable button
+  spinBtn.classList.remove('spinning');
+  spinBtn.disabled = false;
+}
+
+async function fetchRandomRepo() {
+  // Trigger discovery through event bus
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => resolve(null), 10000);
+    
+    const onCompleted = (data) => {
+      clearTimeout(timeout);
+      eventBus.off(EVENTS.DISCOVERY_COMPLETED, onCompleted);
+      eventBus.off(EVENTS.DISCOVERY_FAILED, onFailed);
+      resolve(data.repository);
+    };
+    
+    const onFailed = (data) => {
+      clearTimeout(timeout);
+      eventBus.off(EVENTS.DISCOVERY_COMPLETED, onCompleted);
+      eventBus.off(EVENTS.DISCOVERY_FAILED, onFailed);
+      resolve(null);
+    };
+    
+    eventBus.on(EVENTS.DISCOVERY_COMPLETED, onCompleted);
+    eventBus.on(EVENTS.DISCOVERY_FAILED, onFailed);
+    
+    // Request next repo
+    eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
+  });
+}
+
 function createFilterGroup(label, type, defaultValue, options, onChange) {
   const group = document.createElement('div');
   group.className = 'filter-group';
-
   const lbl = document.createElement('label');
   lbl.className = 'filter-label';
   lbl.textContent = label;
@@ -278,12 +367,5 @@ function createFilterGroup(label, type, defaultValue, options, onChange) {
     input.addEventListener('change', (e) => onChange(e.target.value));
     group.appendChild(input);
   }
-
   return group;
-}
-
-function startDiscovery() {
-  stateManager.setState('currentView', 'discovery');
-  eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
-  eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
 }

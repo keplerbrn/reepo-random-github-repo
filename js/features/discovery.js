@@ -26,7 +26,6 @@ export async function startDiscovery() {
   eventBus.on(EVENTS.APP_INITIALIZED, async () => {
     eventBus.emit(EVENTS.DISCOVERY_STARTED);
     await discoveryQueueService.refillQueue();
-    await loadNextFromQueue();
   });
 
   eventBus.on(EVENTS.REQUEST_NEXT_REPOSITORY, async () => {

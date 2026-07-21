@@ -884,6 +884,65 @@ body {
   margin: 6px 0 2px;
 }
 
+/* ===== SPIN Animation States ===== */
+.home-spin-btn.spinning {
+  animation: spinPulse 0.6s ease infinite;
+  cursor: wait;
+  opacity: 0.8;
+}
+
+@keyframes spinPulse {
+  0% { transform: scale(1); box-shadow: 0 0 30px var(--color-accent-glow); }
+  50% { transform: scale(1.08); box-shadow: 0 0 60px var(--color-accent-glow), 0 0 80px rgba(168, 85, 247, 0.3); }
+  100% { transform: scale(1); box-shadow: 0 0 30px var(--color-accent-glow); }
+}
+
+.home-spin-btn.spinning .spin-icon {
+  animation: diceRoll 0.15s linear infinite;
+}
+
+@keyframes diceRoll {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(1.1); }
+  50% { transform: rotate(180deg) scale(1); }
+  75% { transform: rotate(270deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.home-spin-btn.spinning .spin-label {
+  animation: textPulse 0.6s ease infinite;
+}
+
+@keyframes textPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* ===== Home Result Container ===== */
+.home-result {
+  width: 100%;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.4s ease, margin 0.4s ease;
+  opacity: 0;
+  margin: 0;
+}
+
+.home-result.has-result {
+  max-height: 600px;
+  opacity: 1;
+  margin: 8px 0;
+}
+
+.home-result .repository-card {
+  animation: resultSlideIn 0.5s ease;
+}
+
+@keyframes resultSlideIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* ===== Filter Panel ===== */
 .filter-panel-page .filter-header {
   display: flex;
