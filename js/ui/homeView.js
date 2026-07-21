@@ -1,6 +1,6 @@
 import { localization } from '../core/localization.js';
 import { eventBus } from '../core/eventBus.js';
-import { EVENTS, SUPPORTED_LANGUAGES, UPDATE_RANGES, DISCOVERY_MODES, DISCOVERY_MODE_LABELS } from '../core/constants.js';
+import { EVENTS, SUPPORTED_LANGUAGES, UPDATE_RANGES, DISCOVERY_MODE_LABELS } from '../core/constants.js';
 import { filterService } from '../services/filterService.js';
 import { collectionService } from '../services/collectionService.js';
 import { stateManager } from '../core/stateManager.js';
@@ -23,23 +23,29 @@ export function createHomeView() {
 
   const description = document.createElement('p');
   description.className = 'home-description';
-  description.textContent = 'Explore thousands of open-source projects. Click the button to discover a random repository, or use advanced filters to narrow down your search.';
+  description.textContent = 'Explore thousands of open-source projects. Press the big button or hit SPACE to discover a random repository instantly.';
 
   hero.appendChild(logo);
   hero.appendChild(tagline);
   hero.appendChild(description);
 
-  // Main CTA Button
+  // Ana CTA Butonu - Büyük ve belirgin
   const ctaButton = document.createElement('button');
   ctaButton.className = 'btn btn-primary home-cta';
   ctaButton.innerHTML = '<span class="cta-icon">🎲</span> Discover Random Repository';
+  ctaButton.setAttribute('id', 'home-discover-btn');
   ctaButton.addEventListener('click', () => {
-    stateManager.setState('currentView', 'discovery');
-    eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
-    eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
+    startDiscovery();
   });
 
   hero.appendChild(ctaButton);
+
+  // Boşluk tuşu ipucu
+  const spaceHint = document.createElement('p');
+  spaceHint.className = 'home-space-hint';
+  spaceHint.innerHTML = 'or press <kbd>Space</kbd> to discover';
+  hero.appendChild(spaceHint);
+
   view.appendChild(hero);
 
   // Quick Stats
@@ -217,9 +223,7 @@ export function createHomeView() {
   applyBtn.className = 'btn btn-primary btn-small';
   applyBtn.textContent = 'Apply Filters & Discover';
   applyBtn.addEventListener('click', () => {
-    stateManager.setState('currentView', 'discovery');
-    eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
-    eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
+    startDiscovery();
   });
   filterActions.appendChild(applyBtn);
 
@@ -242,4 +246,10 @@ export function createHomeView() {
   view.appendChild(filtersSection);
 
   return view;
+}
+
+function startDiscovery() {
+  stateManager.setState('currentView', 'discovery');
+  eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
+  eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
 }

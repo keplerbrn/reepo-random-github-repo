@@ -289,6 +289,11 @@ export function initializeAppController() {
       case 'Space': 
         e.preventDefault(); 
         s = 'Space'; 
+        const currentView = stateManager.getState().currentView;
+        if (currentView === 'home') {
+          stateManager.setState('currentView', 'discovery');
+          eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
+        }
         eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY); 
         break;
       case 'Enter': 
