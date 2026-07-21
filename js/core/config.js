@@ -1,0 +1,8 @@
+export const CONFIG = {
+  APP_NAME: 'Reepo',
+  DEFAULT_LANGUAGE: 'en',
+  STORAGE_PREFIX: 'reepo_',
+  REPOSITORY_DATA_PATH: 'data/repos.json',
+  ANIMATION_DURATION: 300,
+  MAX_RECENT_REPOSITORIES: 10
+};

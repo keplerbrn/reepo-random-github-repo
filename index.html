@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Reepo - Discover GitHub Repositories">
+  <title>Reepo - Discover GitHub Repositories</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header" role="banner">
+      <div class="header-content">
+        <h1 class="app-logo">Reepo</h1>
+        <p class="app-tagline">Discover GitHub Repositories</p>
+      </div>
+      <nav class="app-nav" role="navigation" aria-label="Main navigation">
+        <button class="nav-button" aria-label="Toggle sidebar" disabled>
+          <span class="nav-icon">☰</span>
+        </button>
+      </nav>
+    </header>
+    
+    <main id="main-content" class="main-content" role="main">
+      <div class="card-skeleton" role="status" aria-label="Loading repository">
+        <div class="skeleton-header"></div>
+        <div class="skeleton-description"></div>
+        <div class="skeleton-stats"></div>
+        <div class="skeleton-actions"></div>
+      </div>
+    </main>
+    
+    <footer class="app-footer" role="contentinfo">
+      <p class="footer-text">Reepo v1.0 — Explore the unexpected. Save the remarkable. Repeat.</p>
+    </footer>
+  </div>
+  
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

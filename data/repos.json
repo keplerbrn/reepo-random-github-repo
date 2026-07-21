@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "name": "freeCodeCamp",
+    "owner": "freeCodeCamp",
+    "description": "freeCodeCamp.org's open-source codebase and curriculum. Learn to code for free.",
+    "url": "https://github.com/freeCodeCamp/freeCodeCamp",
+    "language": "TypeScript",
+    "topics": ["education", "programming", "javascript", "python"],
+    "stars": 385000,
+    "forks": 35000,
+    "license": "BSD-3-Clause",
+    "lastUpdated": "2024-01-15T10:30:00Z",
+    "archived": false,
+    "fork": false
+  }
+]
