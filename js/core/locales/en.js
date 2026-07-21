@@ -16,6 +16,7 @@ export const en = {
     forks: '{count} forks',
     openGitHub: 'Open on GitHub',
     save: 'Save',
+    saved: 'Saved',
     like: 'Like',
     dislike: 'Dislike',
     share: 'Share'
@@ -26,6 +27,7 @@ export const en = {
     template: 'Template',
     popular: 'Popular',
     new: 'New',
+    recent: 'Recently Updated',
     verified: 'Verified repository'
   }
 };

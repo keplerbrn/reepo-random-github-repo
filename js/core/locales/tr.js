@@ -16,6 +16,7 @@ export const tr = {
     forks: '{count} çatal',
     openGitHub: "GitHub'da Aç",
     save: 'Kaydet',
+    saved: 'Kaydedildi',
     like: 'Beğen',
     dislike: 'Beğenme',
     share: 'Paylaş'
@@ -26,6 +27,7 @@ export const tr = {
     template: 'Şablon',
     popular: 'Popüler',
     new: 'Yeni',
+    recent: 'Yeni Güncellendi',
     verified: 'Doğrulanmış depo'
   }
 };

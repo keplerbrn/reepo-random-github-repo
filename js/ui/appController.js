@@ -2,11 +2,12 @@ import { eventBus } from '../core/eventBus.js';
 import { EVENTS } from '../core/constants.js';
 import { createRepositoryCard } from './repositoryCard.js';
 import { localization } from '../core/localization.js';
+import { reactionService } from '../services/reactionService.js';
+import { collectionService } from '../services/collectionService.js';
 
 export function initializeAppController() {
   const mainContent = document.getElementById('main-content');
   
-  // Discovery event listeners (only active events)
   eventBus.on(EVENTS.DISCOVERY_LOADING, () => {
     showLoading(mainContent);
   });
@@ -19,7 +20,7 @@ export function initializeAppController() {
     showError(mainContent, data.error);
   });
   
-  // Keyboard shortcuts
+  // Keyboard shortcuts (from Sprint 002)
   document.addEventListener('keydown', (event) => {
     if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.isContentEditable) {
       return;
@@ -36,7 +37,6 @@ export function initializeAppController() {
         break;
       case 'Escape':
         shortcut = 'ESC';
-        // Close modal logic will be added in future sprints
         break;
       case 'KeyS':
         if (!event.ctrlKey && !event.metaKey) {
@@ -71,23 +71,14 @@ export function initializeAppController() {
   });
 }
 
-/**
- * Finds and clicks a button with the given data-action value.
- * Provides visual feedback by briefly highlighting the button.
- * @param {string} action - The data-action attribute value to find.
- * @returns {boolean} Whether the button was found and clicked.
- */
 function triggerActionButton(action) {
   const button = document.querySelector(`.repository-card .btn[data-action="${action}"]`);
   if (button) {
     button.click();
-    
-    // Provide visual feedback for keyboard users
     button.classList.add('keyboard-active');
     setTimeout(() => {
       button.classList.remove('keyboard-active');
     }, 150);
-    
     return true;
   }
   return false;
@@ -112,9 +103,11 @@ function showLoading(container) {
 
 function renderRepository(container, repository) {
   container.innerHTML = '';
-  const card = createRepositoryCard(repository);
+  const reaction = reactionService.getReaction(repository.id);
+  const isSaved = collectionService.isSaved(repository.id);
+  const card = createRepositoryCard(repository, reaction, isSaved);
   container.appendChild(card);
-  // Buttons already have data-action attributes from repositoryCard.js
+  eventBus.emit(EVENTS.REPOSITORY_RENDERED, { repository });
 }
 
 function showError(container, error) {
@@ -144,6 +137,5 @@ function showError(container, error) {
   
   container.appendChild(errorDiv);
   
-  // Move focus to error message for keyboard users
   errorDiv.focus();
 }

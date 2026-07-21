@@ -4,7 +4,7 @@ import { truncateText } from '../utils/formatting.js';
 import { localization } from '../core/localization.js';
 import { THRESHOLDS } from '../core/constants.js';
 
-export function createRepositoryCard(repository) {
+export function createRepositoryCard(repository, reaction = null, isSaved = false) {
   if (!repository) {
     return createEmptyCard();
   }
@@ -104,6 +104,13 @@ export function createRepositoryCard(repository) {
     forkBadge.textContent = localization.t('status.fork');
     statusIndicators.appendChild(forkBadge);
   }
+
+  if (repository.template) {
+    const templateBadge = document.createElement('span');
+    templateBadge.className = 'status-badge template';
+    templateBadge.textContent = localization.t('status.template');
+    statusIndicators.appendChild(templateBadge);
+  }
   
   if (repository.stars > THRESHOLDS.POPULAR_STARS) {
     const popularBadge = document.createElement('span');
@@ -111,40 +118,69 @@ export function createRepositoryCard(repository) {
     popularBadge.textContent = localization.t('status.popular');
     statusIndicators.appendChild(popularBadge);
   }
+
+  // Recently Updated badge (if within threshold days)
+  const daysAgo = getDaysAgo(repository.lastUpdated);
+  if (daysAgo <= THRESHOLDS.RECENTLY_UPDATED_DAYS) {
+    const recentBadge = document.createElement('span');
+    recentBadge.className = 'status-badge recent';
+    recentBadge.textContent = localization.t('status.recent');
+    statusIndicators.appendChild(recentBadge);
+  }
   
   // Actions
   const actions = document.createElement('div');
   actions.className = 'card-actions';
   
-  const openButton = createButton(localization.t('card.openGitHub'), 'primary', () => {
+  const openButton = createButton(localization.t('card.openGitHub'), 'primary', 'open-github', () => {
     window.open(repository.url, '_blank', 'noopener,noreferrer');
+    card.dispatchEvent(new CustomEvent('open-github', { bubbles: true, detail: repository }));
   });
   
-  const saveButton = createButton(localization.t('card.save'), 'secondary', () => {
-    card.dispatchEvent(new CustomEvent('save-repository', { 
-      bubbles: true, 
-      detail: repository 
-    }));
-  });
+  const saveButton = createButton(
+    isSaved ? localization.t('card.saved') : localization.t('card.save'),
+    isSaved ? 'primary' : 'secondary',
+    'save-repository',
+    () => {
+      card.dispatchEvent(new CustomEvent('save-repository', { bubbles: true, detail: repository }));
+    }
+  );
+  if (isSaved) saveButton.classList.add('saved');
   
-  const likeButton = createButton(localization.t('card.like'), 'ghost', () => {
-    card.dispatchEvent(new CustomEvent('like-repository', { 
-      bubbles: true, 
-      detail: repository 
-    }));
-  });
+  const likeButton = createButton(
+    localization.t('card.like'),
+    reaction === 'like' ? 'primary' : 'ghost',
+    'like-repository',
+    () => {
+      card.dispatchEvent(new CustomEvent('like-repository', { bubbles: true, detail: repository }));
+    }
+  );
+  if (reaction === 'like') likeButton.classList.add('active');
   
-  const dislikeButton = createButton(localization.t('card.dislike'), 'ghost', () => {
-    card.dispatchEvent(new CustomEvent('dislike-repository', { 
-      bubbles: true, 
-      detail: repository 
-    }));
-  });
+  const dislikeButton = createButton(
+    localization.t('card.dislike'),
+    reaction === 'dislike' ? 'primary' : 'ghost',
+    'dislike-repository',
+    () => {
+      card.dispatchEvent(new CustomEvent('dislike-repository', { bubbles: true, detail: repository }));
+    }
+  );
+  if (reaction === 'dislike') dislikeButton.classList.add('active');
+  
+  const shareButton = createButton(
+    localization.t('card.share'),
+    'ghost',
+    'share-repository',
+    () => {
+      card.dispatchEvent(new CustomEvent('share-repository', { bubbles: true, detail: repository }));
+    }
+  );
   
   actions.appendChild(openButton);
   actions.appendChild(saveButton);
   actions.appendChild(likeButton);
   actions.appendChild(dislikeButton);
+  actions.appendChild(shareButton);
   
   // Assembly
   card.appendChild(header);
@@ -157,11 +193,14 @@ export function createRepositoryCard(repository) {
   return card;
 }
 
-function createButton(text, variant = 'primary', onClick) {
+function createButton(text, variant = 'primary', action = '', onClick) {
   const button = document.createElement('button');
   button.className = `btn btn-${variant}`;
   button.textContent = text;
   button.setAttribute('type', 'button');
+  if (action) {
+    button.setAttribute('data-action', action);
+  }
   
   if (onClick) {
     button.addEventListener('click', onClick);

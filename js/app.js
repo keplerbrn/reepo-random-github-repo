@@ -1,9 +1,12 @@
 import { eventBus } from './core/eventBus.js';
 import { EVENTS } from './core/constants.js';
-import { initializeDiscovery } from './features/discovery.js';
+import { startDiscovery } from './features/discovery.js';
 import { initializeAppController } from './ui/appController.js';
+import { initializeInteractions } from './features/repository/interactions.js';
 import { localization } from './core/localization.js';
 import { CONFIG } from './core/config.js';
+import { collectionService } from './services/collectionService.js';
+import { reactionService } from './services/reactionService.js';
 
 class App {
   constructor() {
@@ -17,14 +20,21 @@ class App {
       // Initialize core modules
       localization.setLanguage(CONFIG.DEFAULT_LANGUAGE);
       
-      // Update HTML static texts with localized strings
+      // Load persisted data into state
+      collectionService.init();
+      reactionService.init();
+      
+      // Update HTML static texts
       this.updateStaticTexts();
       
-      // Initialize features
-      await initializeDiscovery();
+      // Initialize discovery engine
+      await startDiscovery();
       
       // Initialize UI controllers
       initializeAppController();
+      
+      // Initialize interaction handlers
+      initializeInteractions();
       
       this.initialized = true;
       
@@ -51,7 +61,6 @@ class App {
 
 const app = new App();
 
-// Start when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => app.initialize());
 } else {
