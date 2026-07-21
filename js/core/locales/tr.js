@@ -5,6 +5,10 @@ export const tr = {
     footer: 'Reepo v1.0 — Beklenmeyeni keşfet. Dikkate değer olanı kaydet. Tekrarla.',
     pageTitle: 'Reepo - GitHub Repolarını Keşfet'
   },
+  nav: {
+    collections: '📁 Koleksiyonlar',
+    discovery: '🔀 Keşif'
+  },
   discovery: {
     loading: 'Depo keşfediliyor...',
     error: 'Depo yüklenemedi',
@@ -29,5 +33,29 @@ export const tr = {
     new: 'Yeni',
     recent: 'Yeni Güncellendi',
     verified: 'Doğrulanmış depo'
+  },
+  collections: {
+    title: 'Koleksiyonlarım',
+    create: 'Yeni Koleksiyon',
+    rename: 'Yeniden Adlandır',
+    delete: 'Sil',
+    noCollections: 'Henüz koleksiyon yok. Düzenlemeye başlamak için bir tane oluşturun!',
+    noSavedRepos: 'Henüz kaydedilmiş depo yok. Keşfedin ve kaydedin!',
+    savedRepos: 'Kaydedilmiş Repolar',
+    repoCount: '{count} repo',
+    created: 'Oluşturuldu',
+    searchPlaceholder: 'Repolarda ara...',
+    sortByName: 'İsim',
+    sortByStars: 'Yıldız',
+    sortByDate: 'Tarih',
+    export: 'Dışa Aktar',
+    import: 'İçe Aktar',
+    promptName: 'Koleksiyon adı:',
+    promptRename: 'Yeni ad:',
+    confirmDelete: 'Bu koleksiyonu sil?',
+    confirmRemoveRepo: 'Bu repoyu kaldır?',
+    remove: 'Kaldır',
+    importSuccess: '{collections} koleksiyon ve {repos} repo içe aktarıldı.',
+    importError: 'İçe aktarma başarısız: {error}'
   }
 };

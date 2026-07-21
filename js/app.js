@@ -17,28 +17,18 @@ class App {
     if (this.initialized) return;
     
     try {
-      // Initialize core modules
       localization.setLanguage(CONFIG.DEFAULT_LANGUAGE);
       
-      // Load persisted data into state
       collectionService.init();
       reactionService.init();
       
-      // Update HTML static texts
       this.updateStaticTexts();
       
-      // Initialize discovery engine
       await startDiscovery();
-      
-      // Initialize UI controllers
       initializeAppController();
-      
-      // Initialize interaction handlers
       initializeInteractions();
       
       this.initialized = true;
-      
-      // Signal app ready
       eventBus.emit(EVENTS.APP_INITIALIZED);
       
       console.log('Reepo initialized successfully');
@@ -50,21 +40,17 @@ class App {
   updateStaticTexts() {
     const titleEl = document.getElementById('page-title');
     if (titleEl) titleEl.textContent = localization.t('app.pageTitle');
-    
     const taglineEl = document.getElementById('app-tagline');
     if (taglineEl) taglineEl.textContent = localization.t('app.tagline');
-    
     const footerEl = document.getElementById('footer-text');
     if (footerEl) footerEl.textContent = localization.t('app.footer');
   }
 }
 
 const app = new App();
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => app.initialize());
 } else {
   app.initialize();
 }
-
 export { app };
