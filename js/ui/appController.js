@@ -3,18 +3,27 @@ import { EVENTS } from '../core/constants.js';
 import { stateManager } from '../core/stateManager.js';
 import { createRepositoryCard } from './repositoryCard.js';
 import { createCollectionsView } from './collectionsView.js';
+import { createFilterPanel } from './filterPanel.js';
 import { initializeCollectionsFeature } from '../features/collections/index.js';
+import { initializeFiltersFeature } from '../features/filters/index.js';
 import { localization } from '../core/localization.js';
 import { reactionService } from '../services/reactionService.js';
 import { collectionService } from '../services/collectionService.js';
+import { filterService } from '../services/filterService.js';
 
 let collectionsFeature;
+let filtersFeature;
+let currentFilterPanel = null;
 
 export function initializeAppController() {
   const mainContent = document.getElementById('main-content');
   const collectionsBtn = document.getElementById('collections-btn');
+  const filterToggleBtn = document.getElementById('filter-toggle-btn');
 
   collectionsFeature = initializeCollectionsFeature();
+  filtersFeature = initializeFiltersFeature(() => {
+    // Refresh UI after filter changes (will be handled by FILTER_APPLIED event)
+  });
 
   // View switching
   if (collectionsBtn) {
@@ -25,6 +34,25 @@ export function initializeAppController() {
       eventBus.emit(EVENTS.VIEW_CHANGED, { view: newView });
     });
   }
+
+  // Filter panel toggle
+  if (filterToggleBtn) {
+    filterToggleBtn.addEventListener('click', () => {
+      const panel = document.getElementById('filter-panel-container');
+      if (panel.style.display === 'none' || !panel.style.display) {
+        panel.style.display = 'block';
+        filterToggleBtn.classList.add('active');
+        eventBus.emit(EVENTS.FILTER_PANEL_OPENED);
+      } else {
+        panel.style.display = 'none';
+        filterToggleBtn.classList.remove('active');
+        eventBus.emit(EVENTS.FILTER_PANEL_CLOSED);
+      }
+    });
+  }
+
+  // Initial filter panel render
+  renderFilterPanel();
 
   eventBus.on(EVENTS.DISCOVERY_LOADING, () => {
     if (stateManager.getState().currentView === 'discovery') {
@@ -50,12 +78,10 @@ export function initializeAppController() {
       if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.discovery');
     } else {
       collectionsBtn.textContent = localization.t('nav.collections');
-      // Will be re-rendered on next DISCOVERY_COMPLETED or re-request
       eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
     }
   });
 
-  // Re-render collections on relevant events
   [EVENTS.COLLECTION_CREATED, EVENTS.COLLECTION_UPDATED, EVENTS.COLLECTION_DELETED,
    EVENTS.REPOSITORY_SAVED, EVENTS.REPOSITORY_REMOVED, EVENTS.IMPORT_COMPLETED].forEach(ev => {
     eventBus.on(ev, () => {
@@ -63,6 +89,16 @@ export function initializeAppController() {
         renderCollectionsView(mainContent);
       }
     });
+  });
+
+  eventBus.on(EVENTS.FILTER_APPLIED, () => {
+    renderFilterPanel();
+    updateActiveFilterBadge();
+  });
+
+  eventBus.on(EVENTS.FILTER_RESET, () => {
+    renderFilterPanel();
+    updateActiveFilterBadge();
   });
 
   // Keyboard shortcuts
@@ -135,13 +171,11 @@ function renderCollectionsView(container) {
   let collections = state.collections || [];
   let savedRepos = state.savedRepositories || [];
 
-  // Stats map
   const statsMap = {};
   collections.forEach(col => {
     statsMap[col.id] = collectionService.getCollectionStats(col.id);
   });
 
-  // Search & Sort state managed locally for now (could be moved to state in future)
   let searchTerm = '';
   let sortType = 'name';
 
@@ -172,6 +206,24 @@ function renderCollectionsView(container) {
     collectionsFeature.onImport
   );
   container.appendChild(view);
+}
+
+function renderFilterPanel() {
+  const container = document.getElementById('filter-panel-container');
+  if (!container) return;
+  container.innerHTML = '';
+  const filters = filterService.getFilters();
+  const panel = createFilterPanel(filters, filtersFeature.onFilterChange, filtersFeature.onReset);
+  container.appendChild(panel);
+}
+
+function updateActiveFilterBadge() {
+  const badge = document.getElementById('filter-active-count');
+  if (badge) {
+    const count = filterService.getActiveFilterCount();
+    badge.textContent = count > 0 ? count : '';
+    badge.style.display = count > 0 ? 'inline' : 'none';
+  }
 }
 
 function showError(container, error) {

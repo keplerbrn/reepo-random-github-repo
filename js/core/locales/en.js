@@ -57,5 +57,16 @@ export const en = {
     remove: 'Remove',
     importSuccess: 'Imported {collections} collections and {repos} repositories.',
     importError: 'Import failed: {error}'
+  },
+  filters: {
+    title: 'Filters',
+    reset: 'Reset',
+    language: 'Language',
+    minStars: 'Minimum Stars',
+    updatedWithin: 'Updated Within',
+    includeForks: 'Include Forks',
+    includeArchived: 'Include Archived',
+    license: 'License',
+    topics: 'Topics (comma separated)'
   }
 };

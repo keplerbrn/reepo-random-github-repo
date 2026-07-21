@@ -57,5 +57,16 @@ export const tr = {
     remove: 'Kaldır',
     importSuccess: '{collections} koleksiyon ve {repos} repo içe aktarıldı.',
     importError: 'İçe aktarma başarısız: {error}'
+  },
+  filters: {
+    title: 'Filtreler',
+    reset: 'Sıfırla',
+    language: 'Dil',
+    minStars: 'Minimum Yıldız',
+    updatedWithin: 'Güncelleme Zamanı',
+    includeForks: 'Çatallar Dahil',
+    includeArchived: 'Arşivlenmiş Dahil',
+    license: 'Lisans',
+    topics: 'Konular (virgülle ayırın)'
   }
 };

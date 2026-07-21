@@ -26,7 +26,13 @@ export const EVENTS = {
   REPOSITORY_ASSIGNED: 'REPOSITORY_ASSIGNED',
   IMPORT_COMPLETED: 'IMPORT_COMPLETED',
   EXPORT_COMPLETED: 'EXPORT_COMPLETED',
-  VIEW_CHANGED: 'VIEW_CHANGED'
+  VIEW_CHANGED: 'VIEW_CHANGED',
+  FILTER_CHANGED: 'FILTER_CHANGED',
+  FILTER_RESET: 'FILTER_RESET',
+  FILTER_APPLIED: 'FILTER_APPLIED',
+  FILTER_REMOVED: 'FILTER_REMOVED',
+  FILTER_PANEL_OPENED: 'FILTER_PANEL_OPENED',
+  FILTER_PANEL_CLOSED: 'FILTER_PANEL_CLOSED'
 };
 
 export const FEATURE_IDS = {
@@ -40,7 +46,15 @@ export const FEATURE_IDS = {
   COL_003: 'COL-003',
   COL_004: 'COL-004',
   COL_005: 'COL-005',
-  COL_006: 'COL-006'
+  COL_006: 'COL-006',
+  FIL_001: 'FIL-001',
+  FIL_002: 'FIL-002',
+  FIL_003: 'FIL-003',
+  FIL_004: 'FIL-004',
+  FIL_005: 'FIL-005',
+  FIL_006: 'FIL-006',
+  FIL_007: 'FIL-007',
+  FIL_008: 'FIL-008'
 };
 
 export const THRESHOLDS = {
@@ -57,7 +71,30 @@ export const RECENT_REPOS_LIMIT = 10;
 export const STORAGE_KEYS = {
   SAVED_REPOSITORIES: 'savedRepositories',
   REACTIONS: 'reactions',
-  COLLECTIONS: 'collections'
+  COLLECTIONS: 'collections',
+  FILTERS: 'filters'
+};
+
+export const SUPPORTED_LANGUAGES = [
+  'JavaScript', 'TypeScript', 'Python', 'Go', 'Rust',
+  'Java', 'C#', 'C++', 'PHP', 'Swift', 'Kotlin'
+];
+
+export const UPDATE_RANGES = [
+  { value: 'any', label: 'Any time' },
+  { value: 'month', label: 'Last Month' },
+  { value: '6months', label: 'Last 6 Months' },
+  { value: 'year', label: 'Last Year' }
+];
+
+export const DEFAULT_FILTERS = {
+  language: '',
+  minStars: 0,
+  updatedWithin: 'any',
+  includeForks: true,
+  includeArchived: true,
+  license: '',
+  topics: []
 };
 
 export const DEFAULT_STATE = {
@@ -77,7 +114,7 @@ export const DEFAULT_STATE = {
   collections: [],
   savedRepositories: [],
   reactions: {},
-  filters: {},
+  filters: { ...DEFAULT_FILTERS },
   statistics: {},
   gamification: {},
   settings: {
