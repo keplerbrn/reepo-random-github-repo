@@ -80,5 +80,29 @@ export const tr = {
     recentlyViewed: 'Son Görüntülenenler', 
     discoveryHistory: 'Keşif Geçmişi', 
     empty: 'Henüz geçmiş yok.' 
+  },
+  profile: {
+    guest: 'Misafir',
+    edit: 'Profili Düzenle',
+    editProfile: 'Profili Düzenle',
+    username: 'Kullanıcı Adı',
+    avatar: 'Avatar',
+    save: 'Kaydet',
+    cancel: 'İptal',
+    usernameRequired: 'Kullanıcı adı zorunludur.',
+    export: 'Profili Dışa Aktar',
+    import: 'Profili İçe Aktar',
+    reset: 'Profili Sıfırla',
+    confirmReset: 'Profili sıfırlamak istediğinize emin misiniz? Tüm profil verileri kaybolacak.',
+    importSuccess: 'Profil başarıyla içe aktarıldı.',
+    importError: 'İçe aktarma başarısız: {error}',
+    saved: 'Kaydedildi',
+    collections: 'Koleksiyonlar',
+    discoveries: 'Keşifler',
+    likes: 'Beğeniler',
+    dislikes: 'Beğenmemeler',
+    recentActivity: 'Son Aktivite',
+    noActivity: 'Henüz aktivite yok.',
+    joined: 'Katılım: {date}'
   }
 };

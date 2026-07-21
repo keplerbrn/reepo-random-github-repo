@@ -80,5 +80,29 @@ export const en = {
     recentlyViewed: 'Recently Viewed', 
     discoveryHistory: 'Discovery History', 
     empty: 'No history yet.' 
+  },
+  profile: {
+    guest: 'Guest',
+    edit: 'Edit Profile',
+    editProfile: 'Edit Profile',
+    username: 'Username',
+    avatar: 'Avatar',
+    save: 'Save',
+    cancel: 'Cancel',
+    usernameRequired: 'Username is required.',
+    export: 'Export Profile',
+    import: 'Import Profile',
+    reset: 'Reset Profile',
+    confirmReset: 'Are you sure you want to reset your profile? All profile data will be lost.',
+    importSuccess: 'Profile imported successfully.',
+    importError: 'Import failed: {error}',
+    saved: 'Saved',
+    collections: 'Collections',
+    discoveries: 'Discoveries',
+    likes: 'Likes',
+    dislikes: 'Dislikes',
+    recentActivity: 'Recent Activity',
+    noActivity: 'No activity yet.',
+    joined: 'Joined {date}'
   }
 };

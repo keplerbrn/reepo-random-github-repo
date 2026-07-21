@@ -40,7 +40,14 @@ export const EVENTS = {
   DISCOVERY_QUEUE_UPDATED: 'DISCOVERY_QUEUE_UPDATED',
   HISTORY_OPENED: 'HISTORY_OPENED',
   HISTORY_CLEARED: 'HISTORY_CLEARED',
-  RECENT_VIEW_UPDATED: 'RECENT_VIEW_UPDATED'
+  RECENT_VIEW_UPDATED: 'RECENT_VIEW_UPDATED',
+  PROFILE_CREATED: 'PROFILE_CREATED',
+  PROFILE_UPDATED: 'PROFILE_UPDATED',
+  PROFILE_RESET: 'PROFILE_RESET',
+  PROFILE_IMPORTED: 'PROFILE_IMPORTED',
+  PROFILE_EXPORTED: 'PROFILE_EXPORTED',
+  PROFILE_OPENED: 'PROFILE_OPENED',
+  PROFILE_CLOSED: 'PROFILE_CLOSED'
 };
 
 export const DISCOVERY_MODES = {
@@ -60,6 +67,8 @@ export const DISCOVERY_MODE_LABELS = {
 export const RECENT_REPOS_LIMIT = 10;
 export const QUEUE_SIZE = 5;
 
+export const AVATARS = ['default', '🐱', '🐶', '🦊', '🐸', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐭'];
+
 export const STORAGE_KEYS = {
   SAVED_REPOSITORIES: 'savedRepositories',
   REACTIONS: 'reactions',
@@ -68,7 +77,9 @@ export const STORAGE_KEYS = {
   DISCOVERY_HISTORY: 'discoveryHistory',
   RECENTLY_VIEWED: 'recentlyViewed',
   DISCOVERY_MODE: 'discoveryMode',
-  VIEW_COUNTS: 'viewCounts'
+  VIEW_COUNTS: 'viewCounts',
+  USER_PROFILE: 'userProfile',
+  ACTIVITY_LOG: 'activityLog'
 };
 
 export const DEFAULT_FILTERS = {
@@ -82,7 +93,13 @@ export const DEFAULT_FILTERS = {
 };
 
 export const DEFAULT_STATE = {
-  user: null,
+  user: {
+    username: '',
+    avatar: 'default',
+    joinDate: null,
+    bio: ''
+  },
+  activityLog: [],
   repository: { current: null, loading: false, error: null },
   discovery: {
     currentRepository: null,

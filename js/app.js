@@ -8,6 +8,7 @@ import { CONFIG } from './core/config.js';
 import { collectionService } from './services/collectionService.js';
 import { reactionService } from './services/reactionService.js';
 import { filterService } from './services/filterService.js';
+import { profileService } from './services/profileService.js';
 
 class App {
   constructor() {
@@ -23,6 +24,7 @@ class App {
       collectionService.init();
       reactionService.init();
       filterService.init();
+      profileService.init();
       
       this.updateStaticTexts();
       
@@ -55,4 +57,5 @@ if (document.readyState === 'loading') {
 } else {
   app.initialize();
 }
+
 export { app };
