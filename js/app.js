@@ -2,7 +2,7 @@ import { eventBus } from './core/eventBus.js';
 import { EVENTS } from './core/constants.js';
 import { startDiscovery } from './features/discovery.js';
 import { initializeAppController } from './ui/appController.js';
-import { initializeInteractions } from './features/repository/interactions.js';
+import { initializeInteractions } from './features/repository/interactions-v3.js';
 import { localization } from './core/localization.js';
 import { CONFIG } from './core/config.js';
 import { collectionService } from './services/collectionService.js';

@@ -77,6 +77,18 @@ export const DISCOVERY_MODE_LABELS = {
 
 export const RECENT_REPOS_LIMIT = 10;
 export const QUEUE_SIZE = 5;
+export const THRESHOLDS = {
+  POPULAR_STARS: 1000,
+  RECENTLY_UPDATED_DAYS: 30
+};
+
+export const SUPPORTED_LANGUAGES = ['JavaScript', 'TypeScript', 'Python', 'Ruby', 'Go', 'Rust', 'Java', 'C#', 'C++', 'PHP'];
+export const UPDATE_RANGES = [
+  { value: 'any', label: 'Any Time' },
+  { value: 'week', label: 'Last Week' },
+  { value: 'month', label: 'Last Month' },
+  { value: 'year', label: 'Last Year' }
+];
 
 export const AVATARS = ['default', '🐱', '🐶', '🦊', '🐸', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐭'];
 

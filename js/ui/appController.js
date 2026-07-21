@@ -15,7 +15,7 @@ import { createSettingsPanel } from './settingsPanel.js';
 import { initializeCollectionsFeature } from '../features/collections/index.js';
 import { initializeFiltersFeature } from '../features/filters/index.js';
 import { initializeSearchFeature } from '../features/search/index.js';
-import { initializeProfileFeature } from '../features/profile/index.js';
+import { initializeProfileFeature } from '../features/profiile/index.js';
 import { initializeStatisticsFeature } from '../features/statistics/index.js';
 import { initializeSettingsFeature } from '../features/settings/index.js';
 import { openRepoFromHistory, clearHistory, removeFromHistory } from '../features/discovery.js';

@@ -6,7 +6,6 @@ import { reactionService } from './reactionService.js';
 let saveHandler, likeHandler, dislikeHandler, shareHandler, openHandler;
 
 export function initializeInteractions() {
-  // Remove old listeners if reinitializing
   if (saveHandler) document.removeEventListener('save-repository', saveHandler);
   if (likeHandler) document.removeEventListener('like-repository', likeHandler);
   if (dislikeHandler) document.removeEventListener('dislike-repository', dislikeHandler);
