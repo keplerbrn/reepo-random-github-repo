@@ -30,9 +30,9 @@
     <header class="app-header" role="banner">
       <div class="header-content">
         <h1 class="app-logo" id="app-logo">Reepo</h1>
-        <p class="app-tagline" id="app-tagline">Discover GitHub Repositories</p>
       </div>
-      <div class="header-search" id="search-container"></div>
+      <div class="header-search" id="search-container">
+      </div>
       <nav class="app-nav" role="navigation" aria-label="Main navigation">
         <button class="nav-button" id="filter-toggle-btn" aria-label="Toggle Filters"><span class="nav-icon">🔍</span> Filters <span id="filter-active-count" class="badge"></span></button>
         <button class="nav-button" id="history-toggle-btn" aria-label="Toggle History"><span class="nav-icon">🕒</span> History</button>
@@ -52,11 +52,9 @@
     <div id="discovery-mode-container" class="discovery-mode-bar"></div>
 
     <div class="app-body">
-      <div id="filter-panel-container" class="side-panel" style="display:none;"></div>
       <main id="main-content" class="main-content" role="main">
         <div class="card-skeleton" role="status"><div class="skeleton-header"></div><div class="skeleton-description"></div><div class="skeleton-stats"></div><div class="skeleton-actions"></div></div>
       </main>
-      <div id="history-panel-container" class="side-panel" style="display:none;"></div>
     </div>
 
     <div id="notification-container" class="notification-container"></div>

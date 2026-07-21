@@ -11,6 +11,7 @@ import { createProfileView } from './profileView.js';
 import { createProfileEditor } from './profileEditor.js';
 import { createStatisticsDashboard } from './statisticsDashboard.js';
 import { createSettingsPanel } from './settingsPanel.js';
+import { createHomeView } from './homeView.js';
 
 import { initializeCollectionsFeature } from '../features/collections/index.js';
 import { initializeFiltersFeature } from '../features/filters/index.js';
@@ -27,7 +28,6 @@ import { filterService } from '../services/filterService.js';
 import { profileService } from '../services/profileService.js';
 
 let collectionsFeature, filtersFeature, searchFeature, profileFeature, statisticsFeature, settingsFeature;
-let historyVisible = false;
 
 export function initializeAppController() {
   const mainContent = document.getElementById('main-content');
@@ -174,26 +174,32 @@ export function initializeAppController() {
     eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'dashboard' });
   });
 
-  // --- Filtre Paneli Aç/Kapa ---
+  // --- Filtre Sayfası Aç/Kapa ---
   filterToggleBtn?.addEventListener('click', () => {
-    const panel = document.getElementById('filter-panel-container');
-    if (!panel) return;
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-    filterToggleBtn.classList.toggle('active', panel.style.display === 'block');
-    eventBus.emit(panel.style.display === 'block' ? EVENTS.FILTER_PANEL_OPENED : EVENTS.FILTER_PANEL_CLOSED);
+    const cv = stateManager.getState().currentView;
+    const nextView = cv === 'filters' ? 'discovery' : 'filters';
+    stateManager.setState('currentView', nextView);
+    eventBus.emit(EVENTS.VIEW_CHANGED, { view: nextView });
+    filterToggleBtn.classList.toggle('active', nextView === 'filters');
+    if (nextView === 'filters') {
+      eventBus.emit(EVENTS.FILTER_PANEL_OPENED);
+    } else {
+      eventBus.emit(EVENTS.FILTER_PANEL_CLOSED);
+    }
   });
 
-  // --- Geçmiş Paneli Aç/Kapa ---
+  // --- Geçmiş Sayfası Aç/Kapa ---
   historyToggleBtn?.addEventListener('click', () => {
-    historyVisible = !historyVisible;
-    const container = document.getElementById('history-panel-container');
-    if (container) container.style.display = historyVisible ? 'block' : 'none';
-    historyToggleBtn.classList.toggle('active', historyVisible);
-    eventBus.emit(EVENTS.HISTORY_OPENED);
-    if (historyVisible) renderHistoryPanel();
+    const cv = stateManager.getState().currentView;
+    const nextView = cv === 'history' ? 'discovery' : 'history';
+    stateManager.setState('currentView', nextView);
+    eventBus.emit(EVENTS.VIEW_CHANGED, { view: nextView });
+    historyToggleBtn.classList.toggle('active', nextView === 'history');
+    if (nextView === 'history') {
+      eventBus.emit(EVENTS.HISTORY_OPENED);
+    }
   });
 
-  renderFilterPanel();
   renderDiscoveryModeBar();
 
   // --- Arama Çubuğu ---
@@ -211,7 +217,6 @@ export function initializeAppController() {
   eventBus.on(EVENTS.DISCOVERY_COMPLETED, (data) => {
     if (stateManager.getState().currentView === 'discovery') renderRepository(mainContent, data.repository);
     renderDiscoveryModeBar();
-    if (historyVisible) renderHistoryPanel();
   });
 
   eventBus.on(EVENTS.DISCOVERY_FAILED, (data) => {
@@ -219,14 +224,32 @@ export function initializeAppController() {
   });
 
   eventBus.on(EVENTS.VIEW_CHANGED, ({ view }) => {
-    if (view === 'collections') {
+    if (view === 'home') {
+      renderHomeView(mainContent);
+      historyToggleBtn?.classList.remove('active');
+      filterToggleBtn?.classList.remove('active');
+      if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.collections');
+    } else if (view === 'collections') {
       renderCollectionsView(mainContent);
       if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.discovery');
+      historyToggleBtn?.classList.remove('active');
+      filterToggleBtn?.classList.remove('active');
     } else if (view === 'dashboard') {
       renderDashboard(mainContent);
       if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.collections');
+      historyToggleBtn?.classList.remove('active');
+      filterToggleBtn?.classList.remove('active');
+    } else if (view === 'filters') {
+      renderFilterPage(mainContent);
+      historyToggleBtn?.classList.remove('active');
+    } else if (view === 'history') {
+      renderHistoryPage(mainContent);
+      filterToggleBtn?.classList.remove('active');
     } else {
+      // discovery view
       if (collectionsBtn) collectionsBtn.textContent = localization.t('nav.collections');
+      historyToggleBtn?.classList.remove('active');
+      filterToggleBtn?.classList.remove('active');
       eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY);
     }
   });
@@ -238,9 +261,11 @@ export function initializeAppController() {
     });
   });
 
-  eventBus.on(EVENTS.FILTER_APPLIED, () => { renderFilterPanel(); updateActiveFilterBadge(); });
-  eventBus.on(EVENTS.FILTER_RESET, () => { renderFilterPanel(); updateActiveFilterBadge(); });
-  eventBus.on(EVENTS.HISTORY_CLEARED, () => { if (historyVisible) renderHistoryPanel(); });
+  eventBus.on(EVENTS.FILTER_APPLIED, () => { updateActiveFilterBadge(); });
+  eventBus.on(EVENTS.FILTER_RESET, () => { updateActiveFilterBadge(); });
+  eventBus.on(EVENTS.HISTORY_CLEARED, () => { 
+    if (stateManager.getState().currentView === 'history') renderHistoryPage(mainContent); 
+  });
   eventBus.on(EVENTS.SEARCH_CLEARED, () => { 
     if (stateManager.getState().currentView === 'discovery') eventBus.emit(EVENTS.REQUEST_NEXT_REPOSITORY); 
   });
@@ -272,7 +297,10 @@ export function initializeAppController() {
         break;
       case 'Escape': 
         s = 'ESC'; 
-        if (historyVisible) { historyToggleBtn?.click(); } 
+        if (stateManager.getState().currentView === 'filters' || stateManager.getState().currentView === 'history') {
+          stateManager.setState('currentView', 'discovery');
+          eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
+        }
         break;
       case 'KeyS': 
         if (!e.ctrlKey && !e.metaKey) { s = 'S'; a = 'save-repository'; } 
@@ -330,6 +358,12 @@ function renderCollectionsView(container) {
   container.appendChild(createCollectionsView(collections, savedRepos));
 }
 
+function renderHomeView(container) {
+  if (!container) return;
+  container.innerHTML = '';
+  container.appendChild(createHomeView());
+}
+
 function renderDashboard(container) {
   if (!container) return;
   container.innerHTML = '';
@@ -339,25 +373,69 @@ function renderDashboard(container) {
   eventBus.emit(EVENTS.DASHBOARD_OPENED);
 }
 
-function renderFilterPanel() {
-  const container = document.getElementById('filter-panel-container');
+function renderFilterPage(container) {
   if (!container) return;
   container.innerHTML = '';
-  container.appendChild(createFilterPanel(filterService.getFilters(), filtersFeature.onFilterChange, filtersFeature.onReset));
+  
+  // Page wrapper
+  const pageDiv = document.createElement('div');
+  pageDiv.className = 'panel-page filter-panel-page';
+  
+  const filterContent = createFilterPanel(
+    filterService.getFilters(), 
+    (key, val) => {
+      filtersFeature.onFilterChange(key, val);
+      updateActiveFilterBadge();
+    }, 
+    () => {
+      filtersFeature.onReset();
+      updateActiveFilterBadge();
+    }
+  );
+  
+  pageDiv.appendChild(filterContent);
+  container.appendChild(pageDiv);
 }
 
-function renderHistoryPanel() {
-  const container = document.getElementById('history-panel-container');
+function renderHistoryPage(container) {
   if (!container) return;
   container.innerHTML = '';
+  
   const state = stateManager.getState();
-  container.appendChild(createHistoryPanel(
+  const historyContainer = document.createElement('div');
+  historyContainer.className = 'panel-page history-panel-page';
+  
+  // Header with close button
+  const header = document.createElement('div');
+  header.className = 'panel-header';
+  const title = document.createElement('h2');
+  title.textContent = localization.t('history.title');
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'panel-close';
+  closeBtn.textContent = '✕ ' + localization.t('nav.discovery');
+  closeBtn.addEventListener('click', () => {
+    stateManager.setState('currentView', 'discovery');
+    eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
+  });
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+  historyContainer.appendChild(header);
+  
+  // History content
+  const historyContent = createHistoryPanel(
     state.discovery?.history || [],
     state.recentlyViewed || [],
-    openRepoFromHistory,
+    (repo) => {
+      openRepoFromHistory(repo);
+      stateManager.setState('currentView', 'discovery');
+      eventBus.emit(EVENTS.VIEW_CHANGED, { view: 'discovery' });
+    },
     removeFromHistory,
     clearHistory
-  ));
+  );
+  historyContainer.appendChild(historyContent);
+  
+  container.appendChild(historyContainer);
 }
 
 function renderDiscoveryModeBar() {

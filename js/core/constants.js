@@ -163,5 +163,5 @@ export const DEFAULT_STATE = {
   },
   localization: { activeLanguage: 'en' },
   session: { startTime: null },
-  currentView: 'discovery'
+  currentView: 'home'
 };
