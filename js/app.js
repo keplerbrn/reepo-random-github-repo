@@ -9,8 +9,10 @@ import { collectionService } from './services/collectionService.js';
 import { reactionService } from './services/reactionService.js';
 import { filterService } from './services/filterService.js';
 import { profileService } from './services/profileService.js';
+import { settingsService } from './services/settingsService.js';
 import { gamificationService } from './core/gamificationService.js';
 import { initializeGamification } from './features/gamification/index.js';
+import { stateManager } from './core/stateManager.js';
 
 class App {
   constructor() {
@@ -27,10 +29,18 @@ class App {
       reactionService.init();
       filterService.init();
       profileService.init();
+      settingsService.init();
       gamificationService.init();
       initializeGamification();
-      
+
+      localization.setLanguage(stateManager.getState().settings.language);
       this.updateStaticTexts();
+
+      eventBus.on(EVENTS.LANGUAGE_CHANGED, ({ language }) => {
+        localization.setLanguage(language);
+        this.updateStaticTexts();
+        eventBus.emit(EVENTS.VIEW_CHANGED, { view: stateManager.getState().currentView });
+      });
       
       await startDiscovery();
       initializeAppController();

@@ -10,12 +10,14 @@ import { createDiscoveryModeSelector } from './discoveryModeSelector.js';
 import { createProfileView } from './profileView.js';
 import { createProfileEditor } from './profileEditor.js';
 import { createStatisticsDashboard } from './statisticsDashboard.js';
+import { createSettingsPanel } from './settingsPanel.js';
 
 import { initializeCollectionsFeature } from '../features/collections/index.js';
 import { initializeFiltersFeature } from '../features/filters/index.js';
 import { initializeSearchFeature } from '../features/search/index.js';
 import { initializeProfileFeature } from '../features/profile/index.js';
 import { initializeStatisticsFeature } from '../features/statistics/index.js';
+import { initializeSettingsFeature } from '../features/settings/index.js';
 import { openRepoFromHistory, clearHistory, removeFromHistory } from '../features/discovery.js';
 
 import { localization } from '../core/localization.js';
@@ -24,7 +26,7 @@ import { collectionService } from '../services/collectionService.js';
 import { filterService } from '../services/filterService.js';
 import { profileService } from '../services/profileService.js';
 
-let collectionsFeature, filtersFeature, searchFeature, profileFeature, statisticsFeature;
+let collectionsFeature, filtersFeature, searchFeature, profileFeature, statisticsFeature, settingsFeature;
 let historyVisible = false;
 
 export function initializeAppController() {
@@ -40,12 +42,18 @@ export function initializeAppController() {
   const profileContent = document.getElementById('profile-content');
   const closeModal = document.getElementById('close-profile-modal');
 
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsModal = document.getElementById('settings-modal');
+  const settingsContent = document.getElementById('settings-content');
+  const closeSettingsBtn = document.getElementById('close-settings-modal');
+
   // Özellikleri Başlat
   collectionsFeature = initializeCollectionsFeature();
   filtersFeature = initializeFiltersFeature(() => {});
   searchFeature = initializeSearchFeature();
   profileFeature = initializeProfileFeature();
   statisticsFeature = initializeStatisticsFeature();
+  settingsFeature = initializeSettingsFeature();
 
   // --- Profil Modal Mantığı ---
   profileBtn?.addEventListener('click', () => {
@@ -62,6 +70,18 @@ export function initializeAppController() {
       profileModal.style.display = 'none';
       eventBus.emit(EVENTS.PROFILE_CLOSED);
     }
+    if (e.target === settingsModal) {
+      settingsModal.style.display = 'none';
+    }
+  });
+
+  settingsBtn?.addEventListener('click', () => {
+    renderSettingsPanel();
+    if (settingsModal) settingsModal.style.display = 'block';
+  });
+
+  closeSettingsBtn?.addEventListener('click', () => {
+    if (settingsModal) settingsModal.style.display = 'none';
   });
 
   function openProfileModal(editing = false) {
@@ -124,6 +144,21 @@ export function initializeAppController() {
       }
     );
     profileContent.appendChild(editor);
+  }
+
+  function renderSettingsPanel() {
+    if (!settingsContent) return;
+    settingsContent.innerHTML = '';
+    const settings = stateManager.getState().settings;
+    const panel = createSettingsPanel(
+      settings,
+      settingsFeature.onUpdateSetting,
+      settingsFeature.onExportAll,
+      settingsFeature.onImportAll,
+      settingsFeature.onClearCache,
+      settingsFeature.onReset
+    );
+    settingsContent.appendChild(panel);
   }
 
   // --- Görünüm Değiştirme (View Switching) ---

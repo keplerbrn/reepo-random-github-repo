@@ -48,6 +48,11 @@ export const EVENTS = {
   PROFILE_EXPORTED: 'PROFILE_EXPORTED',
   PROFILE_OPENED: 'PROFILE_OPENED',
   PROFILE_CLOSED: 'PROFILE_CLOSED',
+  SETTINGS_UPDATED: 'SETTINGS_UPDATED',
+  THEME_CHANGED: 'THEME_CHANGED',
+  ACCESSIBILITY_CHANGED: 'ACCESSIBILITY_CHANGED',
+  SHORTCUTS_UPDATED: 'SHORTCUTS_UPDATED',
+  APPLICATION_RESET: 'APPLICATION_RESET',
   XP_GAINED: 'XP_GAINED',
   LEVEL_UP: 'LEVEL_UP',
   BADGE_UNLOCKED: 'BADGE_UNLOCKED',
@@ -86,7 +91,8 @@ export const STORAGE_KEYS = {
   VIEW_COUNTS: 'viewCounts',
   USER_PROFILE: 'userProfile',
   ACTIVITY_LOG: 'activityLog',
-  GAMIFICATION: 'gamification'
+  GAMIFICATION: 'gamification',
+  SETTINGS: 'settings'
 };
 
 export const DEFAULT_FILTERS = {
@@ -135,7 +141,14 @@ export const DEFAULT_STATE = {
     dailyQuests: [],
     questsCompletedToday: 0
   },
-  settings: { theme: 'dark', language: 'en', animations: true, sound: false, compactMode: false },
+  settings: {
+    theme: 'dark',
+    language: 'en',
+    notifications: { xp: true, badge: true, achievement: true, quest: true },
+    accessibility: { reducedMotion: false, largeFont: false, highContrast: false },
+    discovery: { defaultMode: 'random', autoOpenFilters: false, enableQueue: true },
+    shortcutsEnabled: true
+  },
   localization: { activeLanguage: 'en' },
   session: { startTime: null },
   currentView: 'discovery'

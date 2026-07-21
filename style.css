@@ -180,6 +180,40 @@ body {
 .side-panel { width: 300px; flex-shrink: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); overflow-y: auto; max-height: calc(100vh - 200px); }
 .main-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--spacing-2xl) 0; }
 
+/* Light theme */
+[data-theme="light"] {
+  --color-bg: #ffffff;
+  --color-surface: #f6f8fa;
+  --color-surface-hover: #eef0f2;
+  --color-border: #d0d7de;
+  --color-text-primary: #1f2328;
+  --color-text-secondary: #656d76;
+  --color-text-tertiary: #8b949e;
+  --color-accent: #6f42c1;
+}
+
+/* Accessibility */
+body.large-font { font-size: 18px; }
+body.high-contrast {
+  --color-text-primary: #000;
+  --color-text-secondary: #333;
+  --color-bg: #fff;
+  --color-surface: #eee;
+  --color-border: #000;
+}
+
+/* Settings panel */
+.settings-panel { max-width: 700px; margin: 0 auto; }
+.settings-section { margin-bottom: var(--spacing-xl); }
+.settings-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm); }
+.settings-row label { flex: 1; }
+.settings-row select, .settings-row input[type="checkbox"] { margin-left: var(--spacing-md); }
+.shortcuts-list { background: var(--color-bg); border-radius: var(--radius-md); padding: var(--spacing-md); }
+.shortcut-item { display: flex; justify-content: space-between; margin-bottom: var(--spacing-xs); }
+.shortcut-item kbd { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 3px; padding: 2px 6px; font-family: monospace; }
+
+.settings-modal-content { max-width: 750px; max-height: 90vh; }
+
 .notification-container {
   position: fixed;
   top: 20px;
